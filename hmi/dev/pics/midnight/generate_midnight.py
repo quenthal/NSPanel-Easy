@@ -11,8 +11,8 @@
 # same way, but restyled first: the plain shapes (tiles, sliders, pills) are
 # recolored from their alpha with the palette below, and the colored artwork
 # (weather, vacuum, color wheel) is placed as it is. Slots shared by both
-# themes (splash, slider cursors) are left alone. The landscape home and cover
-# pages also get their own backgrounds (HOME_SLOT, COVER_SLOT), and the
+# themes (splash, slider cursors) are left alone. The landscape home, cover
+# and media pages also get their own backgrounds (HOME_SLOT, COVER_SLOT, MEDIA_SLOT), and the
 # landscape cover sliders are redrawn horizontal for both themes
 # (COVER_SLIDERS), which replaces those dark-theme slots too.
 #
@@ -40,6 +40,11 @@ BLUE = (0x6F, 0xA8, 0xF5)
 BLUE_FILL = (0x24, 0x40, 0x6A)
 AMBER = (0xF2, 0xB1, 0x4C)
 AMBER_FILL = (0x5A, 0x44, 0x20)
+# Tiles: a soft vertical gradient with a thin edge, so they stand out from the background
+TILE = "tile"
+TILE_TOP = (0x2A, 0x35, 0x4D)
+TILE_BOTTOM = (0x1C, 0x24, 0x34)
+TILE_EDGE = (0x34, 0x41, 0x5B)
 
 BORDER = 3  # Border width of outlined shapes, in pixels
 
@@ -49,6 +54,35 @@ def solid(alpha: Image.Image, color: tuple) -> Image.Image:
     out = Image.new("RGBA", alpha.size, color + (0,))
     out.putalpha(alpha)
     return out
+
+
+def tile_fill(alpha: Image.Image) -> Image.Image:
+    """Fills the shapes of `alpha` as tiles: each band of rows gets its own gradient, and the shapes a 1px edge."""
+    mask = alpha.point(lambda a: 255 if a > 127 else 0)
+    rows = [y for y in range(mask.height) if mask.crop((0, y, mask.width, y + 1)).getbbox()]
+    picture = Image.new("RGB", alpha.size, TILE_BOTTOM)
+    draw = ImageDraw.Draw(picture)
+    start = None
+    for i, y in enumerate(rows):
+        if start is None:
+            start = y
+        if i + 1 == len(rows) or rows[i + 1] != y + 1:  # end of a band
+            span = max(y - start, 1)
+            for row in range(start, y + 1):
+                f = (row - start) / span
+                draw.line((0, row, mask.width, row), fill=tuple(round(a + (b - a) * f) for a, b in zip(TILE_TOP, TILE_BOTTOM)))
+            start = None
+    padded = Image.new("L", (mask.width + 2, mask.height + 2), 0)
+    padded.paste(mask, (1, 1))
+    inner = padded.filter(ImageFilter.MinFilter(3)).crop((1, 1, 1 + mask.width, 1 + mask.height))
+    picture.paste(TILE_EDGE, mask=ImageChops.subtract(mask, inner))
+    out = picture.convert("RGBA")
+    out.putalpha(alpha)
+    return out
+
+
+def tiled(sprite):
+    return tile_fill(sprite.getchannel("A"))
 
 
 def tint(color):
@@ -108,7 +142,7 @@ def as_is(sprite):
 
 # Style per mapping id. Ids not listed are placed as they are.
 STYLES = {
-    "buttons_pages_background_innactive": tint(SURFACE),
+    "buttons_pages_background_innactive": tiled,
     "buttons_pages_background_active": outlined(AMBER_FILL, AMBER),
     "climate_background": dark_gray_to(SURFACE),
     "cover_slider_active_light": tint(BLUE),
@@ -131,13 +165,13 @@ STYLES = {
     "settings_brightness_slider_inactive": tint(SURFACE),
     "settings_dim_slider_active": tint(BLUE),
     "settings_dim_slider_inactive": tint(SURFACE),
-    "settings_button_action_reboot": tint(SURFACE),
-    "settings_button_action_sleep": tint(SURFACE),
-    "settings_button_action_theme": tint(SURFACE),
+    "settings_button_action_reboot": tiled,
+    "settings_button_action_sleep": tiled,
+    "settings_button_action_theme": tiled,
 }
 for n in range(1, 6):
     STYLES[f"fan_mode_{n}_active_light"] = outlined(BLUE_FILL, BLUE)
-    STYLES[f"fan_mode_{n}_inactive_light"] = tint(SURFACE)
+    STYLES[f"fan_mode_{n}_inactive_light"] = tiled
 
 
 # Home page background (landscape only, its own slot after the mapped pictures):
@@ -146,9 +180,9 @@ HOME_SLOT = 134
 HOME_SHAPES = {
     "landscape": [
         (240, 58, 241, 176, 0, SURFACE_HI),  # divider: indoor temperature | time, outdoor temperature, weather
-        (8, 198, 155, 278, 16, SURFACE),    # tiles for button01..button03
-        (166, 198, 313, 278, 16, SURFACE),
-        (324, 198, 471, 278, 16, SURFACE),
+        (8, 198, 155, 278, 16, TILE),       # tiles for button01..button03
+        (166, 198, 313, 278, 16, TILE),
+        (324, 198, 471, 278, 16, TILE),
         (239, 290, 240, 314, 0, SURFACE_HI),  # divider between the hardware buttons' labels
     ],
 }
@@ -158,9 +192,20 @@ HOME_SHAPES = {
 COVER_SLOT = 135
 COVER_SHAPES = {
     "landscape": [
-        (8, 206, 155, 282, 16, SURFACE),
-        (166, 206, 313, 282, 16, SURFACE),
-        (324, 206, 471, 282, 16, SURFACE),
+        (8, 206, 155, 282, 16, TILE),
+        (166, 206, 313, 282, 16, TILE),
+        (324, 206, 471, 282, 16, TILE),
+    ],
+}
+
+# Media player background (landscape only): previous and next tiles, and the round play button
+MEDIA_SLOT = 136
+PLAY = (0x3B, 0x78, 0xD8)  # deeper than BLUE, so the white glyph on it stays readable
+MEDIA_SHAPES = {
+    "landscape": [
+        (104, 168, 191, 228, 16, TILE),
+        (289, 168, 376, 228, 16, TILE),
+        (204, 162, 276, 234, 36, PLAY),
     ],
 }
 
@@ -180,8 +225,13 @@ COVER_SLIDERS = {  # slot -> (theme, part, top-left of the slider on the page)
 def shapes_background(shapes: list, size: tuple) -> Image.Image:
     picture = Image.new("RGBA", size, BG + (255,))
     draw = ImageDraw.Draw(picture)
+    tiles = Image.new("L", size, 0)
     for x0, y0, x1, y1, radius, color in shapes:
-        draw.rounded_rectangle((x0, y0, x1, y1), radius, fill=color)
+        if color == TILE:
+            ImageDraw.Draw(tiles).rounded_rectangle((x0, y0, x1, y1), radius, fill=255)
+        else:
+            draw.rounded_rectangle((x0, y0, x1, y1), radius, fill=color)
+    picture.alpha_composite(tile_fill(tiles))
     return picture
 
 
@@ -245,6 +295,9 @@ def generate(orientation: str) -> int:
         written += 1
     if orientation in HOME_SHAPES:
         shapes_background(HOME_SHAPES[orientation], size).convert("RGB").save(out_dir / f"picture-{HOME_SLOT:04d}.png")
+        written += 1
+    if orientation in MEDIA_SHAPES:
+        shapes_background(MEDIA_SHAPES[orientation], size).convert("RGB").save(out_dir / f"picture-{MEDIA_SLOT:04d}.png")
         written += 1
     if orientation in COVER_SHAPES:
         shapes_background(COVER_SHAPES[orientation], size).convert("RGB").save(out_dir / f"picture-{COVER_SLOT:04d}.png")

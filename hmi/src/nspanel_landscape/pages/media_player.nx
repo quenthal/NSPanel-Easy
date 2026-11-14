@@ -3,19 +3,23 @@ on media_player.load:
   {
     page home_page_id
   }
-  // Page background
+  // Page background; Midnight has its own, with the control tiles and the round play button
   media_player.pic=pic_background_main
+  if(theme==1)
+  {
+    media_player.pic=@pic(picture-0136)
+  }
   // Top header text components — named because button_back (id 3)
   // sits between them and the volume range, breaking the sequence.
-  page_label.picc=pic_background_main
+  page_label.picc=media_player.pic
   page_label.pco=color_pco_main
-  icon_state.picc=pic_background_main
+  icon_state.picc=media_player.pic
   icon_state.pco=color_pco_main
   // Volume row text components (ids 5..8) — vol_slider (id 4) is
   // intentionally skipped; its colors are managed at design time.
   for(sys0=5;sys0<=8;sys0++)
   {
-    b[sys0].picc=pic_background_main
+    b[sys0].picc=media_player.pic
     b[sys0].pco=color_pco_main
   }
   // Track / artist / playback controls (ids 10..17) — time_progress
@@ -24,7 +28,7 @@ on media_player.load:
   // playback state.
   for(sys0=10;sys0<=17;sys0++)
   {
-    b[sys0].picc=pic_background_main
+    b[sys0].picc=media_player.pic
     b[sys0].pco=color_pco_main
   }
   // Progress and volume tracks follow the theme (the fill is set by ESPHome)
@@ -39,8 +43,8 @@ on media_player.load:
   // and are skipped.
   button_back.font=button_back_font
   button_back.pco=color_pco_navigation
-  button_back.picc=pic_background_main
-  button_back.picc2=pic_background_main
+  button_back.picc=media_player.pic
+  button_back.picc2=media_player.pic
   dim=brightness
   sendme
 
