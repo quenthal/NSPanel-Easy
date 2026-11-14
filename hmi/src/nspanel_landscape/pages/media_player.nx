@@ -23,9 +23,8 @@ on media_player.load:
     b[sys0].pco=color_pco_main
   }
   // Track / artist / playback controls (ids 10..17) — time_progress
-  // (id 9) is intentionally skipped; its color is managed by the
-  // ESPHome runtime which sets active blue or theme-aware dim per
-  // playback state.
+  // (id 9) is intentionally skipped; it is a picture slider, themed
+  // below.
   for(sys0=10;sys0<=17;sys0++)
   {
     b[sys0].picc=media_player.pic
@@ -34,7 +33,9 @@ on media_player.load:
   // Progress and volume tracks follow the theme (the progress fill is set by ESPHome); Midnight has a round knob
   if(theme==1)
   {
-    time_progress.bco=color_bco_surface
+    time_progress.pic=@pic(picture-0143)
+    time_progress.pic1=@pic(picture-0144)
+    time_progress.pic2=@pic(picture-0018)  // no knob: the position cannot be dragged
     vol_slider.pic=@pic(picture-0139)
     vol_slider.pic1=@pic(picture-0140)
     vol_slider.pic2=@pic(picture-0137)
@@ -45,6 +46,8 @@ on media_player.load:
   // The volume is set with the slider alone (ESPHome keeps these hidden too)
   vis bt_vol_down,0
   vis bt_vol_up,0
+  // The progress shows the position; seeking is not offered here
+  tsw time_progress,0
   button_back.pco=color_pco_navigation
   button_back.picc=media_player.pic
   button_back.picc2=media_player.pic

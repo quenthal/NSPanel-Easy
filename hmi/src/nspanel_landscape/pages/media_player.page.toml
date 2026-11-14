@@ -143,15 +143,21 @@ txt_maxl = 3
 
 [[component]]
 name = "time_progress"
-type = "progress-bar"
-sendkey = 3
+type = "slider"
+sendkey = 0
 x = 82
-y = 136
+y = 123
 w = 316
-h = 10
+h = 36
+mode = 0
+sta = 2
+psta = 1
+pic = "picture-0145"
+pic1 = "picture-0146"
+pic2 = "picture-0018"
 val = 0
-bco = "#420042"
-pco = "#840042"
+minval = 0
+maxval = 100
 
 [[component]]
 name = "time_current"

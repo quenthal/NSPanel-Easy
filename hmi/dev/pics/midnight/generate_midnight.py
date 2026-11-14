@@ -17,7 +17,10 @@
 # (COVER_SLIDERS), which replaces those dark-theme slots too.
 #
 # Usage:
-#   python3 generate_midnight.py [landscape|portrait|all]   (default: all)
+#   python3 generate_midnight.py [landscape|portrait|all] [--mdi-font FILE]   (default: all)
+#
+#   --mdi-font: materialdesignicons-webfont.ttf (npm package @mdi/font, Apache 2.0), for the
+#   icons on the landscape light page tiles; without it those pictures are left as they are.
 #
 # Requirements:
 #   - python3 with Pillow and PyYAML
@@ -26,7 +29,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageStat
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageStat
 
 PICS_DIR = Path(__file__).resolve().parent.parent
 SRC_ROOT = PICS_DIR.parent.parent / "src"
@@ -224,34 +227,39 @@ THIN_SLIDERS = {  # slot -> (part, size, vertical)
     112: ("track", (420, 36), False), 113: ("fill", (420, 36), False),
     109: ("track", (420, 36), False), 111: ("fill", (420, 36), False),
     139: ("track", (244, 36), False), 140: ("fill", (244, 36), False),  # media: volume
+    143: ("track", (316, 36), False), 144: ("fill", (316, 36), False),  # media: progress
     72: ("track", (85, 235), True), 73: ("fill_on", (85, 235), True),   # light level and fan
 }
-# Dark-theme volume slider, now a picture slider too: track and fill as before, in pills
-DARK_VOLUME = {141: (0x29, 0x2C, 0x29), 142: (0x84, 0x00, 0x42)}
+# Dark-theme volume and progress sliders, now picture sliders too: track and fill as before, in pills
+DARK_PILLS = {141: ((244, 36), (0x29, 0x2C, 0x29)), 142: ((244, 36), (0x84, 0x00, 0x42)),
+              145: ((316, 36), (0x42, 0x00, 0x42)), 146: ((316, 36), (0x84, 0x00, 0x42))}
 
 
-def thin_track(size: tuple, color: tuple, vertical: bool, background: tuple = BG) -> Image.Image:
+def thin_track(size: tuple, color: tuple, vertical: bool, background: tuple = BG, track: int = TRACK) -> Image.Image:
     picture = Image.new("RGB", size, background)
     w, h = size
-    box = ((w - TRACK) // 2, 0, (w + TRACK) // 2 - 1, h - 1) if vertical else (0, (h - TRACK) // 2, w - 1, (h + TRACK) // 2 - 1)
-    ImageDraw.Draw(picture).rounded_rectangle(box, TRACK // 2, fill=color)
+    box = ((w - track) // 2, 0, (w + track) // 2 - 1, h - 1) if vertical else (0, (h - track) // 2, w - 1, (h + track) // 2 - 1)
+    ImageDraw.Draw(picture).rounded_rectangle(box, track // 2, fill=color)
     return picture
 
 
-def knob(size: tuple, vertical: bool, fill: tuple) -> Image.Image:
-    """The knob over the thin track: fill before it (left, or below), track after it."""
+def knob(size: tuple, vertical: bool, fill, track: int = TRACK, diameter: int = KNOB) -> Image.Image:
+    """The knob over the thin track: fill before it (left, or below), track after it.
+    With `fill` None (a gradient track), the knob is on the plain background."""
     w, h = size
     picture = Image.new("RGB", size, BG)
     draw = ImageDraw.Draw(picture)
-    if vertical:
-        draw.rectangle(((w - TRACK) // 2, 0, (w + TRACK) // 2 - 1, h // 2 - 1), fill=SURFACE)
-        draw.rectangle(((w - TRACK) // 2, h // 2, (w + TRACK) // 2 - 1, h - 1), fill=fill)
+    if fill is None:
+        pass
+    elif vertical:
+        draw.rectangle(((w - track) // 2, 0, (w + track) // 2 - 1, h // 2 - 1), fill=SURFACE)
+        draw.rectangle(((w - track) // 2, h // 2, (w + track) // 2 - 1, h - 1), fill=fill)
     else:
-        draw.rectangle((0, (h - TRACK) // 2, w // 2 - 1, (h + TRACK) // 2 - 1), fill=fill)
-        draw.rectangle((w // 2, (h - TRACK) // 2, w - 1, (h + TRACK) // 2 - 1), fill=SURFACE)
-    x0, y0 = (w - KNOB) // 2, (h - KNOB) // 2
-    draw.ellipse((x0, y0, x0 + KNOB - 1, y0 + KNOB - 1), fill=KNOB_EDGE)
-    draw.ellipse((x0 + 1, y0 + 1, x0 + KNOB - 2, y0 + KNOB - 2), fill=KNOB_COLOR)
+        draw.rectangle((0, (h - track) // 2, w // 2 - 1, (h + track) // 2 - 1), fill=fill)
+        draw.rectangle((w // 2, (h - track) // 2, w - 1, (h + track) // 2 - 1), fill=SURFACE)
+    x0, y0 = (w - diameter) // 2, (h - diameter) // 2
+    draw.ellipse((x0, y0, x0 + diameter - 1, y0 + diameter - 1), fill=KNOB_EDGE)
+    draw.ellipse((x0 + 1, y0 + 1, x0 + diameter - 2, y0 + diameter - 2), fill=KNOB_COLOR)
     return picture
 
 
@@ -261,9 +269,108 @@ def midnight_sliders(out_dir: Path) -> int:
         thin_track(size, color, vertical).save(out_dir / f"picture-{slot:04d}.png")
     knob((36, 36), False, BLUE).save(out_dir / f"picture-{KNOB_H_SLOT:04d}.png")
     knob((85, 36), True, AMBER).save(out_dir / f"picture-{KNOB_V_SLOT:04d}.png")
-    for slot, color in DARK_VOLUME.items():
-        thin_track((244, 36), color, False, background=(0, 0, 0)).save(out_dir / f"picture-{slot:04d}.png")
-    return len(THIN_SLIDERS) + 2 + len(DARK_VOLUME)
+    for slot, (size, color) in DARK_PILLS.items():
+        thin_track(size, color, False, background=(0, 0, 0)).save(out_dir / f"picture-{slot:04d}.png")
+    return len(THIN_SLIDERS) + 2 + len(DARK_PILLS)
+
+
+# Light page (landscape only): a column of icon tiles on the right, and horizontal sliders.
+# The mode tiles are dual-state buttons, so their pictures carry the icon: normal and selected.
+LIGHT_TILE = (74, 42)
+LIGHT_TILES = {  # button -> (position, icon codepoint in the MDI webfont, dark normal/pressed, light normal/pressed)
+    "light_button": ((396, 48), 0xF00DF, (22, 23), (76, 67)),   # mdi:brightness-6
+    "temp_button": ((396, 96), 0xF050F, (24, 25), (77, 68)),    # mdi:thermometer
+    "color_button": ((396, 144), 0xF03D8, (26, 27), (78, 69)),  # mdi:palette
+}
+LIGHT_SLOT = 147  # Midnight light page background: tiles behind the effect and power glyphs
+LIGHT_SHAPES = {
+    "landscape": [
+        (396, 192, 469, 233, 12, TILE),
+        (396, 240, 469, 281, 12, TILE),
+    ],
+}
+LIGHT_SLIDER = ((24, 150), (352, 36))  # place and size of lightslider and tempslider
+LIGHT_THIN = {148: "track", 149: "fill_on"}  # Midnight lightslider, with a thicker track
+LIGHT_TRACK, LIGHT_KNOB = 20, 32
+TEMP_TRACK, TEMP_KNOB = 14, 30
+KNOB_AMBER_SLOT = 150  # knob of the Midnight lightslider
+KNOB_TEMP_SLOT = 151  # knob of the Midnight tempslider, over the gradient
+TEXT = (0xF2, 0xF4, 0xF7)
+TEXT_SECONDARY = (0x9A, 0xA4, 0xB2)
+
+
+def wave(place: tuple, size: tuple) -> Image.Image:
+    """The dark-theme background under a component."""
+    background = Image.open(PICS_DIR / "background/background_dark_landscape.png").convert("RGB")
+    return background.crop((place[0], place[1], place[0] + size[0], place[1] + size[1]))
+
+
+def icon_tile(font, codepoint: int, theme: str, selected: bool, place: tuple) -> Image.Image:
+    w, h = LIGHT_TILE
+    if theme == "dark":
+        picture = wave(place, LIGHT_TILE)
+        blue = sprite_color("cover/cover_slider_active.png")
+        fill, edge, glyph = ((0x10, 0x30, 0x4C), blue, (0xFF, 0xFF, 0xFF)) if selected else ((0x29, 0x2C, 0x29), None, (0xCE, 0xCF, 0xCE))
+        draw = ImageDraw.Draw(picture)
+        draw.rounded_rectangle((0, 0, w - 1, h - 1), 12, fill=edge or fill)
+        if edge:
+            draw.rounded_rectangle((2, 2, w - 3, h - 3), 10, fill=fill)
+    else:
+        picture = Image.new("RGB", LIGHT_TILE, BG)
+        if selected:
+            draw = ImageDraw.Draw(picture)
+            draw.rounded_rectangle((0, 0, w - 1, h - 1), 12, fill=BLUE)
+            draw.rounded_rectangle((2, 2, w - 3, h - 3), 10, fill=BLUE_FILL)
+        else:
+            mask = Image.new("L", LIGHT_TILE, 0)
+            ImageDraw.Draw(mask).rounded_rectangle((0, 0, w - 1, h - 1), 12, fill=255)
+            rgba = picture.convert("RGBA")
+            rgba.alpha_composite(tile_fill(mask))
+            picture = rgba.convert("RGB")
+        glyph = TEXT if selected else TEXT_SECONDARY
+    ImageDraw.Draw(picture).text((w / 2, h / 2), chr(codepoint), font=font, fill=glyph, anchor="mm")
+    return picture
+
+
+def light_page(out_dir: Path, mdi_font) -> int:
+    written = 0
+    if mdi_font is not None:
+        font = ImageFont.truetype(str(mdi_font), 28)
+        for place, codepoint, dark, light in LIGHT_TILES.values():
+            for theme, slots in (("dark", dark), ("light", light)):
+                for selected, slot in zip((False, True), slots):
+                    icon_tile(font, codepoint, theme, selected, place).save(out_dir / f"picture-{slot:04d}.png")
+                    written += 1
+    else:
+        print("light page tiles skipped: no --mdi-font given")
+    place, size = LIGHT_SLIDER
+    for slot, part in LIGHT_THIN.items():
+        thin_track(size, AMBER if part == "fill_on" else SURFACE, False, track=LIGHT_TRACK).save(out_dir / f"picture-{slot:04d}.png")
+    knob((36, 36), False, AMBER, LIGHT_TRACK, LIGHT_KNOB).save(out_dir / f"picture-{KNOB_AMBER_SLOT:04d}.png")
+    # as narrow as the knob, so that little of the gradient is hidden beside it
+    knob((TEMP_KNOB, 36), False, None, TEMP_TRACK, TEMP_KNOB).save(out_dir / f"picture-{KNOB_TEMP_SLOT:04d}.png")
+    w, h = size
+    for slot, src in ((28, "light/light_slider_level_inactive.png"), (29, "light/light_slider_level_active.png")):
+        picture = wave(place, size)
+        ImageDraw.Draw(picture).rounded_rectangle((0, 0, w - 1, h - 1), h // 2, fill=sprite_color(src))
+        picture.save(out_dir / f"picture-{slot:04d}.png")
+    # colour temperature: the colors down the middle of the vertical gradient, laid out so that its
+    # top (the maximum) is on the right: a pill 20 high on the dark theme, with its line cursor, and a
+    # thin one on Midnight, with a knob (which leaves a pixel or so of background beside it on the track)
+    sprite = Image.open(PICS_DIR / "light/light_slider_temp.png").convert("RGBA")
+    column = [sprite.getpixel((sprite.width // 2, y)) for y in range(sprite.height)]
+    column = [c[:3] for c in column if c[3] > 250]
+    line = Image.new("RGB", (len(column), 1))
+    line.putdata(column[::-1])
+    gradient = line.resize((w, h), Image.Resampling.BILINEAR)
+    for slot, base, track in ((21, wave(place, size), 20), (71, Image.new("RGB", size, BG), TEMP_TRACK)):
+        mask = Image.new("L", size, 0)
+        ImageDraw.Draw(mask).rounded_rectangle((0, (h - track) // 2, w - 1, (h + track) // 2 - 1), track // 2, fill=255)
+        base.paste(gradient, mask=mask)
+        base.save(out_dir / f"picture-{slot:04d}.png")
+    written += len(LIGHT_THIN) + 2 + 4
+    shapes_background(LIGHT_SHAPES["landscape"], SIZES["landscape"]).convert("RGB").save(out_dir / f"picture-{LIGHT_SLOT:04d}.png")
+    return written + 1
 
 
 # Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).
@@ -314,7 +421,7 @@ def source_for(src: str) -> str:
     return src
 
 
-def generate(orientation: str) -> int:
+def generate(orientation: str, mdi_font=None) -> int:
     size = SIZES[orientation]
     out_dir = SRC_ROOT / f"nspanel_{orientation}" / "pictures"
     background = Image.new("RGBA", size, BG + (255,))
@@ -338,7 +445,8 @@ def generate(orientation: str) -> int:
             canvas = background.copy()
             canvas.alpha_composite(sprite, (x, y))
             picture = canvas.crop((x, y, x + w, y + h))
-        redrawn = orientation == "landscape" and slot in THIN_SLIDERS  # replaced below, maybe at another size
+        light_slots = {s for _, _, dark, light in LIGHT_TILES.values() for s in dark + light} | {21, 71}
+        redrawn = orientation == "landscape" and (slot in THIN_SLIDERS or slot in light_slots)  # replaced below, at another size
         if target.exists() and not redrawn and Image.open(target).size != picture.size:
             raise SystemExit(f"ERROR: {entry['id']}: size {picture.size} differs from {target.name}")
         picture.convert("RGB").save(target)
@@ -357,13 +465,20 @@ def generate(orientation: str) -> int:
             cover_slider(theme, part, place).save(out_dir / f"picture-{slot:04d}.png")
             written += 1
         written += midnight_sliders(out_dir)
+        written += light_page(out_dir, mdi_font)
     print(f"{orientation}: wrote {written} pictures to {out_dir}")
     return written
 
 
 if __name__ == "__main__":
-    which = sys.argv[1] if len(sys.argv) > 1 else "all"
+    args = sys.argv[1:]
+    mdi = None
+    if "--mdi-font" in args:
+        at = args.index("--mdi-font")
+        mdi = Path(args[at + 1])
+        del args[at:at + 2]
+    which = args[0] if args else "all"
     if which not in ("landscape", "portrait", "all"):
-        raise SystemExit("Usage: generate_midnight.py [landscape|portrait|all]")
+        raise SystemExit("Usage: generate_midnight.py [landscape|portrait|all] [--mdi-font FILE]")
     for orientation in (("landscape", "portrait") if which == "all" else (which,)):
-        generate(orientation)
+        generate(orientation, mdi if orientation == "landscape" else None)

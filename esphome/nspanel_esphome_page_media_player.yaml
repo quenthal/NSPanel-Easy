@@ -192,22 +192,11 @@ script:
               disp1->set_component_value("prg_current", view.position);
               disp1->set_component_value("prg_total", view.duration);
             }  // if (progress changed)
-            // Active fill — explicit color, overrides design-time pco.
-            #ifdef NSPANEL_EASY_HW_DISPLAY
-            const bool light_theme = (current_theme == ThemeMode::LIGHT);
-            #else  // NSPANEL_EASY_HW_DISPLAY
-            const bool light_theme = false;
-            #endif  // NSPANEL_EASY_HW_DISPLAY
-            disp1->set_component_foreground_color("time_progress",
-                                                  light_theme ? Colors::RGB565_MIDNIGHT_BLUE : ${COLOR_BLUE_INDIGO});
+            // time_progress is a picture slider: its fill comes from its pictures, per theme
           } else {
-            // Empty bar: zero progress, theme-aware dim color, no animation.
-            // Use the Nextion runtime variable color_pco_unsupported so
-            // the bar follows the active theme without ESPHome having to
-            // know which theme is current.
+            // Empty bar: zero progress, no animation
             disp1->set_component_value("prg_current", 0);
             disp1->set_component_value("time_progress", 0);
-            disp1->send_command("time_progress.pco=color_pco_unsupported");
             last_media_duration = 0;
             last_media_position = 0;
           }  // if (has_duration)

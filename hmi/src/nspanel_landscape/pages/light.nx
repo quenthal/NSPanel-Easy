@@ -37,17 +37,20 @@ on light.load:
   if(theme==1)
   {
     // Page background
-    light.pic=pic_background_main
+    // Own background, with the tiles behind the effect and power glyphs
+    light.pic=@pic(picture-0147)
     // Brightness control components
     light_button.pic=@pic(picture-0076)
     light_button.pic2=@pic(picture-0067)
-    lightslider.pic=@pic(picture-0072)
-    lightslider.pic1=@pic(picture-0073)
-    lightslider.pic2=@pic(picture-0138)  // round knob
-    light_value.picc=pic_background_main
-    light_value_2.picc=pic_background_main
-    ring.picc=pic_background_main
-    field.picc=pic_background_main
+    lightslider.pic=@pic(picture-0148)
+    lightslider.pic1=@pic(picture-0149)
+    lightslider.pic2=@pic(picture-0150)  // round knob
+    light_value.picc=light.pic
+    light_value.pco=color_pco_main
+    light_value_2.picc=light.pic
+    light_value_2.pco=color_pco_secondary
+    ring.picc=light.pic
+    field.picc=light.pic
     ring.pco=color_bco_main  // helper values, kept invisible
     field.pco=color_bco_main
     // Temp control components
@@ -55,22 +58,25 @@ on light.load:
     temp_button.pic2=@pic(picture-0068)
     tempslider.pic=@pic(picture-0071)
     tempslider.pic1=@pic(picture-0071)
-    temp_value.picc=pic_background_main
-    temp_value_2.picc=pic_background_main
+    tempslider.pic2=@pic(picture-0151)  // round knob
+    temp_value.picc=light.pic
+    temp_value.pco=color_pco_main
+    temp_value_2.picc=light.pic
+    temp_value_2.pco=color_pco_secondary
     // Color control components
     color_button.pic=@pic(picture-0078)
     color_button.pic2=@pic(picture-0069)
     colorwheel.pic=@pic(picture-0070)
     // Effect button
-    effect_button.picc=pic_background_main
+    effect_button.picc=light.pic
     // Power button
-    power_button.picc=pic_background_main
+    power_button.picc=light.pic
     // Back button (two picc slots: released / pressed)
-    button_back.picc=pic_background_main
-    button_back.picc2=pic_background_main
+    button_back.picc=light.pic
+    button_back.picc2=light.pic
     // Header components
-    icon_state.picc=pic_background_main
-    page_label.picc=pic_background_main
+    icon_state.picc=light.pic
+    page_label.picc=light.pic
   }
   dim=brightness
   sendme
