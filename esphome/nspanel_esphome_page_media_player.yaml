@@ -168,8 +168,9 @@ script:
           disp1->set_component_visibility("vol_text", has_vol_set);
           // HMI buttons call volume_set (slider nudgers), not volume_up/down.
           // Gate on VOLUME_SET, not VOLUME_STEP (Sonos lacks VOLUME_STEP). See #202.
-          disp1->set_component_visibility("bt_vol_down", has_vol_set);
-          disp1->set_component_visibility("bt_vol_up", has_vol_set);
+          // The volume is set with the slider alone; bt_mute in front of it mutes
+          disp1->set_component_visibility("bt_vol_down", false);
+          disp1->set_component_visibility("bt_vol_up", false);
 
           // Media progress bar.
           // "duration > 0" is the cue that a finite track is loaded

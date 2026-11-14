@@ -19,6 +19,7 @@ display:
             if (touch_event) return;                            // Ignore the touch, so only the release will be used
             if (page_id == get_page_id("home") and              // Page `home`
                 (component_id == hmi::home::WEATHER.id or       // Outdoor temperature
+                component_id == hmi::home::WEATHER_GLYPH.id or  // Weather glyph
                 component_id == hmi::home::OUTDOOR_TEMP.id)) {  // Weather picture
               goto_page->execute(get_page_id("weather01"));
               return;

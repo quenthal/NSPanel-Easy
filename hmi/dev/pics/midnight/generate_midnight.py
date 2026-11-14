@@ -179,7 +179,7 @@ for n in range(1, 6):
 HOME_SLOT = 134
 HOME_SHAPES = {
     "landscape": [
-        (240, 58, 241, 176, 0, SURFACE_HI),  # divider: indoor temperature | time, outdoor temperature, weather
+        (296, 58, 297, 180, 0, SURFACE_HI),  # divider: indoor temperature and values | time, weather, date
         (8, 198, 155, 278, 16, TILE),       # tiles for button01..button03
         (166, 198, 313, 278, 16, TILE),
         (324, 198, 471, 278, 16, TILE),
@@ -209,17 +209,71 @@ MEDIA_SHAPES = {
     ],
 }
 
+# Midnight sliders (landscape only): a thin track and a white round knob as the cursor.
+# The knob picture carries the track under it: the fill on the start side, the track on the
+# other, so it blends in wherever the cursor is.
+TRACK = 12           # thickness of the thin track, in pixels
+KNOB = 28            # diameter of the knob
+KNOB_COLOR = (0xF2, 0xF4, 0xF7)
+KNOB_EDGE = (0xB8, 0xC0, 0xCC)
+KNOB_H_SLOT, KNOB_V_SLOT = 137, 138  # horizontal (36 high) and vertical (85 wide) knobs
+THIN_SLIDERS = {  # slot -> (part, size, vertical)
+    88: ("fill", (420, 36), False), 89: ("track", (420, 36), False),   # settings: brightness
+    90: ("fill", (420, 36), False), 91: ("track", (420, 36), False),   # settings: dim
+    105: ("track", (420, 36), False), 107: ("fill", (420, 36), False),  # cover sliders
+    112: ("track", (420, 36), False), 113: ("fill", (420, 36), False),
+    109: ("track", (420, 36), False), 111: ("fill", (420, 36), False),
+    139: ("track", (244, 36), False), 140: ("fill", (244, 36), False),  # media: volume
+    72: ("track", (85, 235), True), 73: ("fill_on", (85, 235), True),   # light level and fan
+}
+# Dark-theme volume slider, now a picture slider too: track and fill as before, in pills
+DARK_VOLUME = {141: (0x29, 0x2C, 0x29), 142: (0x84, 0x00, 0x42)}
+
+
+def thin_track(size: tuple, color: tuple, vertical: bool, background: tuple = BG) -> Image.Image:
+    picture = Image.new("RGB", size, background)
+    w, h = size
+    box = ((w - TRACK) // 2, 0, (w + TRACK) // 2 - 1, h - 1) if vertical else (0, (h - TRACK) // 2, w - 1, (h + TRACK) // 2 - 1)
+    ImageDraw.Draw(picture).rounded_rectangle(box, TRACK // 2, fill=color)
+    return picture
+
+
+def knob(size: tuple, vertical: bool, fill: tuple) -> Image.Image:
+    """The knob over the thin track: fill before it (left, or below), track after it."""
+    w, h = size
+    picture = Image.new("RGB", size, BG)
+    draw = ImageDraw.Draw(picture)
+    if vertical:
+        draw.rectangle(((w - TRACK) // 2, 0, (w + TRACK) // 2 - 1, h // 2 - 1), fill=SURFACE)
+        draw.rectangle(((w - TRACK) // 2, h // 2, (w + TRACK) // 2 - 1, h - 1), fill=fill)
+    else:
+        draw.rectangle((0, (h - TRACK) // 2, w // 2 - 1, (h + TRACK) // 2 - 1), fill=fill)
+        draw.rectangle((w // 2, (h - TRACK) // 2, w - 1, (h + TRACK) // 2 - 1), fill=SURFACE)
+    x0, y0 = (w - KNOB) // 2, (h - KNOB) // 2
+    draw.ellipse((x0, y0, x0 + KNOB - 1, y0 + KNOB - 1), fill=KNOB_EDGE)
+    draw.ellipse((x0 + 1, y0 + 1, x0 + KNOB - 2, y0 + KNOB - 2), fill=KNOB_COLOR)
+    return picture
+
+
+def midnight_sliders(out_dir: Path) -> int:
+    for slot, (part, size, vertical) in THIN_SLIDERS.items():
+        color = {"track": SURFACE, "fill": BLUE, "fill_on": AMBER}[part]
+        thin_track(size, color, vertical).save(out_dir / f"picture-{slot:04d}.png")
+    knob((36, 36), False, BLUE).save(out_dir / f"picture-{KNOB_H_SLOT:04d}.png")
+    knob((85, 36), True, AMBER).save(out_dir / f"picture-{KNOB_V_SLOT:04d}.png")
+    for slot, color in DARK_VOLUME.items():
+        thin_track((244, 36), color, False, background=(0, 0, 0)).save(out_dir / f"picture-{slot:04d}.png")
+    return len(THIN_SLIDERS) + 2 + len(DARK_VOLUME)
+
+
 # Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).
 # The slider shows its pic1 from the start to the value, and its pic after it.
 COVER_SLIDER_SIZE = (420, 36)
-COVER_SLIDERS = {  # slot -> (theme, part, top-left of the slider on the page)
+COVER_SLIDERS = {  # dark slot -> (theme, part, top-left of the slider on the page)
     104: ("dark", "track", (30, 90)), 106: ("dark", "fill", (30, 90)),     # coverslider (above the tilt slider)
     20: ("dark", "track", (30, 136)), 19: ("dark", "fill", (30, 136)),     # coverslider2 (alone)
     108: ("dark", "track", (30, 164)), 110: ("dark", "fill", (30, 164)),   # tiltslider
-    105: ("light", "track", (30, 90)), 107: ("light", "fill", (30, 90)),
-    112: ("light", "track", (30, 136)), 113: ("light", "fill", (30, 136)),
-    109: ("light", "track", (30, 164)), 111: ("light", "fill", (30, 164)),
-}
+}  # the Midnight ones (105, 107, 109, 111, 112, 113) are thin sliders, see THIN_SLIDERS
 
 
 def shapes_background(shapes: list, size: tuple) -> Image.Image:
@@ -243,15 +297,11 @@ def sprite_color(src: str) -> tuple:
 
 
 def cover_slider(theme: str, part: str, place: tuple) -> Image.Image:
-    """A horizontal cover slider part, on the page background where the slider sits."""
+    """A dark-theme horizontal cover slider part, on the wave background where the slider sits."""
     w, h = COVER_SLIDER_SIZE
-    if theme == "dark":
-        background = Image.open(PICS_DIR / "background/background_dark_landscape.png").convert("RGB")
-        picture = background.crop((place[0], place[1], place[0] + w, place[1] + h))
-        color = sprite_color("cover/cover_slider_active.png" if part == "fill" else "cover/cover_slider_inactive.png")
-    else:
-        picture = Image.new("RGB", COVER_SLIDER_SIZE, BG)
-        color = BLUE if part == "fill" else SURFACE
+    background = Image.open(PICS_DIR / f"background/background_{theme}_landscape.png").convert("RGB")
+    picture = background.crop((place[0], place[1], place[0] + w, place[1] + h))
+    color = sprite_color("cover/cover_slider_active.png" if part == "fill" else "cover/cover_slider_inactive.png")
     ImageDraw.Draw(picture).rounded_rectangle((0, 0, w - 1, h - 1), h // 2, fill=color)
     return picture
 
@@ -288,7 +338,7 @@ def generate(orientation: str) -> int:
             canvas = background.copy()
             canvas.alpha_composite(sprite, (x, y))
             picture = canvas.crop((x, y, x + w, y + h))
-        redrawn = orientation == "landscape" and slot in COVER_SLIDERS  # replaced below, at another size
+        redrawn = orientation == "landscape" and slot in THIN_SLIDERS  # replaced below, maybe at another size
         if target.exists() and not redrawn and Image.open(target).size != picture.size:
             raise SystemExit(f"ERROR: {entry['id']}: size {picture.size} differs from {target.name}")
         picture.convert("RGB").save(target)
@@ -306,6 +356,7 @@ def generate(orientation: str) -> int:
         for slot, (theme, part, place) in COVER_SLIDERS.items():
             cover_slider(theme, part, place).save(out_dir / f"picture-{slot:04d}.png")
             written += 1
+        written += midnight_sliders(out_dir)
     print(f"{orientation}: wrote {written} pictures to {out_dir}")
     return written
 

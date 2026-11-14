@@ -241,6 +241,8 @@ constexpr HMIComponent INDR_TEMP = {"home.indr_temp", 4};             ///< Indoo
 constexpr HMIComponent INDR_TEMP_ICON = {"home.indr_temp_icon", 27};  ///< Indoor temp icon (3 chars max)
 constexpr HMIComponent OUTDOOR_TEMP = {"home.outdoor_temp", 5};       ///< Outdoor temperature (8 chars max)
 constexpr HMIComponent WEATHER = {"home.weather", 7};                 ///< Weather picture
+constexpr HMIComponent WEATHER_GLYPH = {"home.weather_glyph",
+                                        57};  ///< Weather glyph, shown instead of the picture (3 chars max)
 
 // Value display components
 constexpr HMIComponent VALUE01 = {"home.value01", 8};             ///< Value 1 text (30 chars max)

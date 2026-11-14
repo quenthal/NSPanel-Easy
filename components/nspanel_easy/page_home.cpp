@@ -12,6 +12,7 @@
 #include "esphome/core/log.h"
 #include "esphome/core/preferences.h"
 
+#include "all_icons.h"  // For Icons::MDI_WEATHER_*, the home weather glyphs
 #include "base.h"
 #include "nextion_components.h"
 
@@ -357,6 +358,49 @@ static void home_button_render(const SubBinding &binding, const SubRuntime &rt, 
 
 #ifdef NSPANEL_EASY_USE_WEATHER
 
+/**
+ * @brief Weather glyph of the home page for a condition.
+ *
+ * @param index Condition index in WEATHER_CONDITIONS (0 is unknown).
+ * @param sun_up Whether the sun is above the horizon, for the day and night glyphs.
+ * @return The glyph, or an empty string for an unknown condition.
+ */
+static const char *home_weather_glyph(uint8_t index, bool sun_up) {
+  switch (index) {
+    case 1:   // clear_night
+    case 13:  // sunny
+      return sun_up ? Icons::MDI_WEATHER_SUNNY : Icons::MDI_WEATHER_NIGHT;
+    case 2:  // cloudy
+      return Icons::MDI_WEATHER_CLOUDY;
+    case 3:  // exceptional
+      return Icons::MDI_WEATHER_CLOUDY_ALERT;
+    case 4:  // fog
+      return Icons::MDI_WEATHER_FOG;
+    case 5:  // hail
+      return Icons::MDI_WEATHER_HAIL;
+    case 6:  // lightning
+      return Icons::MDI_WEATHER_LIGHTNING;
+    case 7:  // lightning_rainy
+      return Icons::MDI_WEATHER_LIGHTNING_RAINY;
+    case 8:  // partlycloudy
+      return sun_up ? Icons::MDI_WEATHER_PARTLY_CLOUDY : Icons::MDI_WEATHER_NIGHT_PARTLY_CLOUDY;
+    case 9:  // pouring
+      return Icons::MDI_WEATHER_POURING;
+    case 10:  // rainy
+      return Icons::MDI_WEATHER_RAINY;
+    case 11:  // snowy
+      return Icons::MDI_WEATHER_SNOWY;
+    case 12:  // snowy_rainy
+      return Icons::MDI_WEATHER_SNOWY_RAINY;
+    case 14:  // windy
+      return Icons::MDI_WEATHER_WINDY;
+    case 15:  // windy_variant
+      return Icons::MDI_WEATHER_WINDY_VARIANT;
+    default:  // unknown
+      return "";
+  }  // switch (index)
+}
+
 void home_weather_resolve() {
   if (nextion_display == nullptr) {
     return;  // Boot has not handed the display over yet
@@ -376,6 +420,8 @@ void home_weather_resolve() {
   ESP_LOGD(TAG, "Update weather pic: %" PRIu16 " (condition %" PRIu8 ", sun up: %s, stale: %s)", pic,
            weather_condition_index, YESNO(sun_info.is_up), YESNO(api_stale));
   nextion_display->set_component_pic(hmi::home::WEATHER.name, static_cast<uint8_t>(pic));
+  // The Midnight home shows the condition as a glyph beside the outdoor temperature
+  nextion_display->set_component_text(hmi::home::WEATHER_GLYPH.name, home_weather_glyph(index, sun_info.is_up));
 }
 
 /**

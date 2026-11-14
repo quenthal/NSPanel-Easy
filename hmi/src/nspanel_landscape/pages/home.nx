@@ -74,11 +74,9 @@ on home.load:
       vis value04_icon,sys2
     }
   }
-  // Midnight home: values, button04..07 and the navigation shortcuts are left to their own pages
-  vis value01,0
-  vis value01_icon,0
-  vis value02,0
-  vis value02_icon,0
+  // Midnight home: values 03..04, button04..07 and the navigation shortcuts are left to their own pages,
+  // and the weather shows as a glyph (weather_glyph) instead of the picture
+  vis weather,0
   vis value03,0
   vis value03_icon,0
   vis value04,0

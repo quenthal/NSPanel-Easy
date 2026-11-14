@@ -28,6 +28,8 @@ on settings.load:
     brightslider.pic1=@pic(picture-0088)
     dimslider.pic=@pic(picture-0091)
     dimslider.pic1=@pic(picture-0090)
+    brightslider.pic2=@pic(picture-0137)  // round knob
+    dimslider.pic2=@pic(picture-0137)
     // Action buttons
     bt_reboot_pic.pic=@pic(picture-0092)
     bt_sleep_pic.pic=@pic(picture-0093)

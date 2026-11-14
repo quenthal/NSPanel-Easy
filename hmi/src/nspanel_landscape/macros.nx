@@ -25,9 +25,14 @@ macro theme_apply:
     cover.coverslider.pic1=@pic(picture-0107)
     cover.tiltslider.pic=@pic(picture-0109)
     cover.tiltslider.pic1=@pic(picture-0111)
+    // round knob on the thin Midnight sliders
+    cover.coverslider2.pic2=@pic(picture-0137)
+    cover.coverslider.pic2=@pic(picture-0137)
+    cover.tiltslider.pic2=@pic(picture-0137)
     // fan page
     fan.fanslider.pic=@pic(picture-0072)
     fan.fanslider.pic1=@pic(picture-0073)
+    fan.fanslider.pic2=@pic(picture-0138)
   }else
   {
     // DARK theme
@@ -48,9 +53,13 @@ macro theme_apply:
     cover.coverslider.pic1=@pic(picture-0106)
     cover.tiltslider.pic=@pic(picture-0108)
     cover.tiltslider.pic1=@pic(picture-0110)
+    cover.coverslider2.pic2=@pic(picture-0018)
+    cover.coverslider.pic2=@pic(picture-0018)
+    cover.tiltslider.pic2=@pic(picture-0018)
     // fan page
     fan.fanslider.pic=@pic(picture-0039)
     fan.fanslider.pic1=@pic(picture-0040)
+    fan.fanslider.pic2=@pic(picture-0018)
   }
   // Page backgrounds are set by each page's load event (home, climate): a page's own
   // picture cannot be reached from another page, and the page reloads after this macro
@@ -81,7 +90,9 @@ macro theme_apply:
   home.value03_icon.picc=pic_background_home
   home.value04.picc=pic_background_home
   home.value04_icon.picc=pic_background_home
-  // home title and tile labels
+  // home title, weather glyph and tile labels
+  home.weather_glyph.picc=pic_background_home
+  home.weather_glyph.pco=color_pco_main
   home.home_icon.picc=pic_background_home
   home.home_icon.pco=color_pco_main
   home.home_title.picc=pic_background_home

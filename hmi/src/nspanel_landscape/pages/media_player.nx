@@ -31,17 +31,20 @@ on media_player.load:
     b[sys0].picc=media_player.pic
     b[sys0].pco=color_pco_main
   }
-  // Progress and volume tracks follow the theme (the fill is set by ESPHome)
+  // Progress and volume tracks follow the theme (the progress fill is set by ESPHome); Midnight has a round knob
   if(theme==1)
   {
     time_progress.bco=color_bco_surface
-    vol_slider.bco=color_bco_surface
-    vol_slider.bco1=color_pco_highlight
-    vol_slider.pco=color_pco_main
+    vol_slider.pic=@pic(picture-0139)
+    vol_slider.pic1=@pic(picture-0140)
+    vol_slider.pic2=@pic(picture-0137)
   }
   // Variables and timers (ids 18+) have no visual representation
   // and are skipped.
   button_back.font=button_back_font
+  // The volume is set with the slider alone (ESPHome keeps these hidden too)
+  vis bt_vol_down,0
+  vis bt_vol_up,0
   button_back.pco=color_pco_navigation
   button_back.picc=media_player.pic
   button_back.picc2=media_player.pic

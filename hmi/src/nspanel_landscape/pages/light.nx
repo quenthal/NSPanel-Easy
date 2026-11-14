@@ -43,6 +43,7 @@ on light.load:
     light_button.pic2=@pic(picture-0067)
     lightslider.pic=@pic(picture-0072)
     lightslider.pic1=@pic(picture-0073)
+    lightslider.pic2=@pic(picture-0138)  // round knob
     light_value.picc=pic_background_main
     light_value_2.picc=pic_background_main
     ring.picc=pic_background_main
