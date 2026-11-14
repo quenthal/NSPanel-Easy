@@ -34,6 +34,7 @@ from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageFont, ImageStat
 PICS_DIR = Path(__file__).resolve().parent.parent
 SRC_ROOT = PICS_DIR.parent.parent / "src"
 SIZES = {"landscape": (480, 320), "portrait": (320, 480)}
+# The EU panel's frame hides the 30 rightmost pixels: the landscape layouts keep to x 8..442
 
 # Midnight palette; keep in sync with Colors::RGB565_MIDNIGHT_* (nextion_constants.h)
 BG = (0x0E, 0x14, 0x1D)
@@ -182,11 +183,11 @@ for n in range(1, 6):
 HOME_SLOT = 134
 HOME_SHAPES = {
     "landscape": [
-        (296, 58, 297, 180, 0, SURFACE_HI),  # divider: indoor temperature and values | time, weather, date
-        (8, 198, 155, 278, 16, TILE),       # tiles for button01..button03
-        (166, 198, 313, 278, 16, TILE),
-        (324, 198, 471, 278, 16, TILE),
-        (239, 290, 240, 314, 0, SURFACE_HI),  # divider between the hardware buttons' labels
+        (276, 58, 277, 180, 0, SURFACE_HI),  # divider: indoor temperature and values | time, weather, date
+        (8, 198, 146, 278, 16, TILE),       # tiles for button01..button03
+        (155, 198, 293, 278, 16, TILE),
+        (302, 198, 440, 278, 16, TILE),
+        (224, 290, 225, 314, 0, SURFACE_HI),  # divider between the hardware buttons' labels
     ],
 }
 
@@ -195,9 +196,9 @@ HOME_SHAPES = {
 COVER_SLOT = 135
 COVER_SHAPES = {
     "landscape": [
-        (8, 206, 155, 282, 16, TILE),
-        (166, 206, 313, 282, 16, TILE),
-        (324, 206, 471, 282, 16, TILE),
+        (8, 206, 146, 282, 16, TILE),
+        (155, 206, 293, 282, 16, TILE),
+        (302, 206, 440, 282, 16, TILE),
     ],
 }
 
@@ -206,9 +207,9 @@ MEDIA_SLOT = 136
 PLAY = (0x3B, 0x78, 0xD8)  # deeper than BLUE, so the white glyph on it stays readable
 MEDIA_SHAPES = {
     "landscape": [
-        (104, 168, 191, 228, 16, TILE),
-        (289, 168, 376, 228, 16, TILE),
-        (204, 162, 276, 234, 36, PLAY),
+        (100, 168, 185, 227, 16, TILE),
+        (264, 168, 349, 227, 16, TILE),
+        (189, 162, 261, 234, 36, PLAY),
     ],
 }
 
@@ -223,16 +224,16 @@ KNOB_H_SLOT, KNOB_V_SLOT = 137, 138  # horizontal (36 high) and vertical (85 wid
 THIN_SLIDERS = {  # slot -> (part, size, vertical)
     88: ("fill", (420, 36), False), 89: ("track", (420, 36), False),   # settings: brightness
     90: ("fill", (420, 36), False), 91: ("track", (420, 36), False),   # settings: dim
-    105: ("track", (420, 36), False), 107: ("fill", (420, 36), False),  # cover sliders
-    112: ("track", (420, 36), False), 113: ("fill", (420, 36), False),
-    109: ("track", (420, 36), False), 111: ("fill", (420, 36), False),
-    139: ("track", (244, 36), False), 140: ("fill", (244, 36), False),  # media: volume
-    143: ("track", (316, 36), False), 144: ("fill", (316, 36), False),  # media: progress
+    105: ("track", (402, 36), False), 107: ("fill", (402, 36), False),  # cover sliders
+    112: ("track", (402, 36), False), 113: ("fill", (402, 36), False),
+    109: ("track", (402, 36), False), 111: ("fill", (402, 36), False),
+    139: ("track", (300, 36), False), 140: ("fill", (300, 36), False),  # media: volume
+    143: ("track", (300, 36), False), 144: ("fill", (300, 36), False),  # media: progress
     72: ("track", (85, 235), True), 73: ("fill_on", (85, 235), True),   # light level and fan
 }
 # Dark-theme volume and progress sliders, now picture sliders too: track and fill as before, in pills
-DARK_PILLS = {141: ((244, 36), (0x29, 0x2C, 0x29)), 142: ((244, 36), (0x84, 0x00, 0x42)),
-              145: ((316, 36), (0x42, 0x00, 0x42)), 146: ((316, 36), (0x84, 0x00, 0x42))}
+DARK_PILLS = {141: ((300, 36), (0x29, 0x2C, 0x29)), 142: ((300, 36), (0x84, 0x00, 0x42)),
+              145: ((300, 36), (0x42, 0x00, 0x42)), 146: ((300, 36), (0x84, 0x00, 0x42))}
 
 
 def thin_track(size: tuple, color: tuple, vertical: bool, background: tuple = BG, track: int = TRACK) -> Image.Image:
@@ -278,18 +279,18 @@ def midnight_sliders(out_dir: Path) -> int:
 # The mode tiles are dual-state buttons, so their pictures carry the icon: normal and selected.
 LIGHT_TILE = (74, 42)
 LIGHT_TILES = {  # button -> (position, icon codepoint in the MDI webfont, dark normal/pressed, light normal/pressed)
-    "light_button": ((396, 48), 0xF00DF, (22, 23), (76, 67)),   # mdi:brightness-6
-    "temp_button": ((396, 96), 0xF050F, (24, 25), (77, 68)),    # mdi:thermometer
-    "color_button": ((396, 144), 0xF03D8, (26, 27), (78, 69)),  # mdi:palette
+    "light_button": ((368, 48), 0xF00DF, (22, 23), (76, 67)),   # mdi:brightness-6
+    "temp_button": ((368, 96), 0xF050F, (24, 25), (77, 68)),    # mdi:thermometer
+    "color_button": ((368, 144), 0xF03D8, (26, 27), (78, 69)),  # mdi:palette
 }
 LIGHT_SLOT = 147  # Midnight light page background: tiles behind the effect and power glyphs
 LIGHT_SHAPES = {
     "landscape": [
-        (396, 192, 469, 233, 12, TILE),
-        (396, 240, 469, 281, 12, TILE),
+        (368, 192, 441, 233, 12, TILE),
+        (368, 240, 441, 281, 12, TILE),
     ],
 }
-LIGHT_SLIDER = ((24, 150), (352, 36))  # place and size of lightslider and tempslider
+LIGHT_SLIDER = ((16, 150), (344, 36))  # place and size of lightslider and tempslider
 LIGHT_THIN = {148: "track", 149: "fill_on"}  # Midnight lightslider, with a thicker track
 LIGHT_TRACK, LIGHT_KNOB = 20, 32
 TEMP_TRACK, TEMP_KNOB = 14, 30
@@ -379,18 +380,18 @@ def light_page(out_dir: Path, mdi_font) -> int:
 # keep the values the -/+ buttons step, so their pictures are the background under them: not shown.
 # Its own pictures, so the water heater keeps picture-0037/0064.
 CLIMATE_BG = {"light": 152, "dark": 153}
-CLIMATE_ROUND = [((24, 66), "-"), ((396, 66), "+")]  # top-left of each 60x60 button, and its sign
-CLIMATE_TILES = [((140, 196, 339, 251), 28),   # heating pill (a toggle with off)
+CLIMATE_ROUND = [((24, 66), "-"), ((366, 66), "+")]  # top-left of each 60x60 button, and its sign
+CLIMATE_TILES = [((125, 196, 324, 251), 28),   # heating pill (a toggle with off)
                  ((44, 196, 99, 251), 28),     # button08, round
-                 ((380, 196, 435, 251), 28)]   # button09, round
+                 ((350, 196, 405, 251), 28)]   # button09, round
 CLIMATE_TILE_PICS = {"light": (160, 161), "dark": (162, 163)}  # tiles, active tiles; see page_climate.h
 CLIMATE_SLIDER_CURSORS = {168: BG, 169: (0, 0, 0)}  # Midnight, dark
 CLIMATE_SLIDERS = {  # slot -> (theme, top-left on the page, width); track and fill alike
-    154: ("light", (24, 282), 432), 155: ("light", (24, 282), 432),    # climateslider
-    164: ("light", (24, 282), 212), 165: ("light", (24, 282), 212),    # slider_low, slider_high
-    156: ("dark", (24, 282), 432), 157: ("dark", (24, 282), 432),      # climateslider
-    158: ("dark", (24, 282), 212), 159: ("dark", (24, 282), 212),      # slider_low
-    166: ("dark", (244, 282), 212), 167: ("dark", (244, 282), 212),    # slider_high
+    154: ("light", (24, 282), 402), 155: ("light", (24, 282), 402),    # climateslider
+    164: ("light", (24, 282), 196), 165: ("light", (24, 282), 196),    # slider_low, slider_high
+    156: ("dark", (24, 282), 402), 157: ("dark", (24, 282), 402),      # climateslider
+    158: ("dark", (24, 282), 196), 159: ("dark", (24, 282), 196),      # slider_low
+    166: ("dark", (228, 282), 196), 167: ("dark", (228, 282), 196),    # slider_high
 }
 
 
@@ -433,11 +434,11 @@ def climate_page(out_dir: Path) -> int:
 
 # Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).
 # The slider shows its pic1 from the start to the value, and its pic after it.
-COVER_SLIDER_SIZE = (420, 36)
+COVER_SLIDER_SIZE = (402, 36)
 COVER_SLIDERS = {  # dark slot -> (theme, part, top-left of the slider on the page)
-    104: ("dark", "track", (30, 90)), 106: ("dark", "fill", (30, 90)),     # coverslider (above the tilt slider)
-    20: ("dark", "track", (30, 136)), 19: ("dark", "fill", (30, 136)),     # coverslider2 (alone)
-    108: ("dark", "track", (30, 164)), 110: ("dark", "fill", (30, 164)),   # tiltslider
+    104: ("dark", "track", (24, 90)), 106: ("dark", "fill", (24, 90)),     # coverslider (above the tilt slider)
+    20: ("dark", "track", (24, 136)), 19: ("dark", "fill", (24, 136)),     # coverslider2 (alone)
+    108: ("dark", "track", (24, 164)), 110: ("dark", "fill", (24, 164)),   # tiltslider
 }  # the Midnight ones (105, 107, 109, 111, 112, 113) are thin sliders, see THIN_SLIDERS
 
 

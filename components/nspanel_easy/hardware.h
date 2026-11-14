@@ -117,7 +117,7 @@ struct HwButtonBarArea {
  * Button: 0 = left, 1 = right.
  */
 constexpr HwButtonBarArea HW_BUTTON_BAR_AREAS[3][2] = {
-    {{70, 311, 100, 4}, {310, 311, 100, 4}},  // EU, centered under the Midnight home labels
+    {{62, 311, 100, 4}, {287, 311, 100, 4}},  // EU, centered under the Midnight home labels (450 visible)
     {{16, 471, 120, 3}, {183, 471, 120, 3}},  // US Portrait
     {{467, 173, 3, 120}, {467, 27, 3, 120}},  // US Landscape
 };
