@@ -227,12 +227,12 @@ THIN_SLIDERS = {  # slot -> (part, size, vertical)
     105: ("track", (402, 36), False), 107: ("fill", (402, 36), False),  # cover sliders
     112: ("track", (402, 36), False), 113: ("fill", (402, 36), False),
     109: ("track", (402, 36), False), 111: ("fill", (402, 36), False),
-    139: ("track", (300, 36), False), 140: ("fill", (300, 36), False),  # media: volume
+    139: ("track", (290, 36), False), 140: ("fill", (290, 36), False),  # media: volume
     143: ("track", (300, 36), False), 144: ("fill", (300, 36), False),  # media: progress
     72: ("track", (85, 235), True), 73: ("fill_on", (85, 235), True),   # light level and fan
 }
 # Dark-theme volume and progress sliders, now picture sliders too: track and fill as before, in pills
-DARK_PILLS = {141: ((300, 36), (0x29, 0x2C, 0x29)), 142: ((300, 36), (0x84, 0x00, 0x42)),
+DARK_PILLS = {141: ((290, 36), (0x29, 0x2C, 0x29)), 142: ((290, 36), (0x84, 0x00, 0x42)),
               145: ((300, 36), (0x42, 0x00, 0x42)), 146: ((300, 36), (0x84, 0x00, 0x42))}
 
 

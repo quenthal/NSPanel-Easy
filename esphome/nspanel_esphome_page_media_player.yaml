@@ -142,7 +142,7 @@ script:
 
           // Button - Mute/Unmute.
           if (has_mute) {
-            disp1->set_component_text("bt_mute", view.muted ? Icons::MDI_VOLUME_VARIANT_OFF : Icons::MDI_VOLUME_LOW);
+            disp1->set_component_text("bt_mute", view.muted ? Icons::MDI_VOLUME_VARIANT_OFF : Icons::MDI_VOLUME_HIGH);
             disp1->set_component_value("is_muted", view.muted ? 1 : 0);
           }  // if (has_mute)
           disp1->set_component_visibility("bt_mute", has_mute);
