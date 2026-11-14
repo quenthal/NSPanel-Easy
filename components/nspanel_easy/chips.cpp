@@ -4,6 +4,11 @@
 
 #include "chips.h"
 #include "nextion_components.h"
+#include "nextion_constants.h"  // For Colors::midnight
+
+#ifdef NSPANEL_EASY_HW_DISPLAY
+#include "hw_display.h"  // For current_theme
+#endif                   // NSPANEL_EASY_HW_DISPLAY
 
 #include "esphome/components/nextion/nextion.h"
 
@@ -29,16 +34,22 @@ void chip_render(uint8_t idx) {
 
   const ChipState &the_chip = chip_states[idx];
   const char *text = the_chip.visible ? the_chip.icon : "";
+#ifdef NSPANEL_EASY_HW_DISPLAY
+  // The Midnight theme draws the state colors from its own palette
+  const uint16_t color = (current_theme == ThemeMode::LIGHT) ? Colors::midnight(the_chip.color) : the_chip.color;
+#else   // NSPANEL_EASY_HW_DISPLAY
+  const uint16_t color = the_chip.color;
+#endif  // NSPANEL_EASY_HW_DISPLAY
 
   nextion_display->set_component_text(CHIP_NAMES_HOME[idx], text);
   if (the_chip.visible) {
-    nextion_display->set_component_font_color(CHIP_NAMES_HOME[idx], the_chip.color);
+    nextion_display->set_component_font_color(CHIP_NAMES_HOME[idx], color);
   }
 
   if (chips_mirror_page) {
     nextion_display->set_component_text(CHIP_NAMES[idx], text);
     if (the_chip.visible) {
-      nextion_display->set_component_font_color(CHIP_NAMES[idx], the_chip.color);
+      nextion_display->set_component_font_color(CHIP_NAMES[idx], color);
     }
   }
 }

@@ -373,26 +373,30 @@ def light_page(out_dir: Path, mdi_font) -> int:
     return written + 1
 
 
-# Climate page (landscape only), both themes: round -/+ buttons beside the target temperature on
-# the page background, and thin picture sliders. The mode and device tiles are not on the background:
-# each tile button crops one of the full-page tile pictures, so a hidden button leaves no tile behind.
+# Climate page (landscape only), both themes: round -/+ buttons beside the target temperature on the
+# page background. The heating pill and the round device buttons are not on the background: each
+# crops one of the full-page tile pictures, so a hidden button leaves nothing behind. The sliders only
+# keep the values the -/+ buttons step, so their pictures are the background under them: not shown.
 # Its own pictures, so the water heater keeps picture-0037/0064.
 CLIMATE_BG = {"light": 152, "dark": 153}
-CLIMATE_ROUND = [((24, 60), "-"), ((396, 60), "+")]  # top-left of each 60x60 button, and its sign
-CLIMATE_TILES = [(8, 206, 471, 254),                         # heating (a toggle with off)
-                 (8, 262, 235, 310), (244, 262, 471, 310)]   # button08, button09
+CLIMATE_ROUND = [((24, 66), "-"), ((396, 66), "+")]  # top-left of each 60x60 button, and its sign
+CLIMATE_TILES = [((140, 196, 339, 251), 28),   # heating pill (a toggle with off)
+                 ((44, 196, 99, 251), 28),     # button08, round
+                 ((380, 196, 435, 251), 28)]   # button09, round
 CLIMATE_TILE_PICS = {"light": (160, 161), "dark": (162, 163)}  # tiles, active tiles; see page_climate.h
-CLIMATE_SLIDERS = {  # slot -> (theme, part, top-left on the page, width)
-    154: ("light", "track", None, 432), 155: ("light", "fill", None, 432),          # climateslider
-    164: ("light", "track", None, 212), 165: ("light", "fill", None, 212),          # slider_low, slider_high
-    156: ("dark", "track", (24, 162), 432), 157: ("dark", "fill", (24, 162), 432),  # climateslider
-    158: ("dark", "track", (24, 162), 212), 159: ("dark", "fill", (24, 162), 212),  # slider_low
-    166: ("dark", "track", (244, 162), 212), 167: ("dark", "fill", (244, 162), 212),  # slider_high
+CLIMATE_SLIDER_CURSORS = {168: BG, 169: (0, 0, 0)}  # Midnight, dark
+CLIMATE_SLIDERS = {  # slot -> (theme, top-left on the page, width); track and fill alike
+    154: ("light", (24, 282), 432), 155: ("light", (24, 282), 432),    # climateslider
+    164: ("light", (24, 282), 212), 165: ("light", (24, 282), 212),    # slider_low, slider_high
+    156: ("dark", (24, 282), 432), 157: ("dark", (24, 282), 432),      # climateslider
+    158: ("dark", (24, 282), 212), 159: ("dark", (24, 282), 212),      # slider_low
+    166: ("dark", (244, 282), 212), 167: ("dark", (244, 282), 212),    # slider_high
 }
 
 
 def climate_page(out_dir: Path) -> int:
     dark_bg = Image.open(PICS_DIR / "background/background_dark_landscape.png")
+    backgrounds = {}
     for theme, slot in CLIMATE_BG.items():
         dark = theme == "dark"
         surface = (0x29, 0x2C, 0x29) if dark else TILE
@@ -406,31 +410,25 @@ def climate_page(out_dir: Path) -> int:
             if kind == "+":
                 draw.rectangle((cx - 1, cy - 11, cx + 1, cy + 11), fill=sign)
         picture.convert("RGB").save(out_dir / f"picture-{slot:04d}.png")
+        backgrounds[theme] = picture.convert("RGB")
         # tiles over the same background
         normal, active = CLIMATE_TILE_PICS[theme]
         base = picture.convert("RGBA")
-        tiles = shapes_background([(*r, 14, surface) for r in CLIMATE_TILES], SIZES["landscape"], base)
+        tiles = shapes_background([(*r, radius, surface) for r, radius in CLIMATE_TILES], SIZES["landscape"], base)
         tiles.convert("RGB").save(out_dir / f"picture-{normal:04d}.png")
         on = base.copy()
         draw = ImageDraw.Draw(on)
         edge, fill = ((0xFA, 0xA4, 0x20), (0x4A, 0x2E, 0x10)) if dark else (AMBER, AMBER_FILL)
-        for x0, y0, x1, y1 in CLIMATE_TILES:
-            draw.rounded_rectangle((x0, y0, x1, y1), 14, fill=edge)
-            draw.rounded_rectangle((x0 + 2, y0 + 2, x1 - 2, y1 - 2), 12, fill=fill)
+        for (x0, y0, x1, y1), radius in CLIMATE_TILES:
+            draw.rounded_rectangle((x0, y0, x1, y1), radius, fill=edge)
+            draw.rounded_rectangle((x0 + 2, y0 + 2, x1 - 2, y1 - 2), radius - 2, fill=fill)
         on.convert("RGB").save(out_dir / f"picture-{active:04d}.png")
-    blue = sprite_color("cover/cover_slider_active.png")
-    for slot, (theme, part, place, width) in CLIMATE_SLIDERS.items():
-        size = (width, 36)
-        if theme == "dark":
-            under = wave(place, size)
-            color = blue if part == "fill" else (0x29, 0x2C, 0x29)
-            mask = thin_track(size, (255, 255, 255), False, background=(0, 0, 0)).convert("L")
-            under.paste(Image.new("RGB", size, color), mask=mask)
-            picture = under
-        else:
-            picture = thin_track(size, BLUE if part == "fill" else SURFACE, False)
-        picture.save(out_dir / f"picture-{slot:04d}.png")
-    return 3 * len(CLIMATE_BG) + len(CLIMATE_SLIDERS)
+    for slot, (theme, (x, y), width) in CLIMATE_SLIDERS.items():
+        backgrounds[theme].crop((x, y, x + width, y + 36)).save(out_dir / f"picture-{slot:04d}.png")
+    # their cursors: one pixel of the background color
+    for slot, color in CLIMATE_SLIDER_CURSORS.items():
+        Image.new("RGB", (1, 1), color).save(out_dir / f"picture-{slot:04d}.png")
+    return 3 * len(CLIMATE_BG) + len(CLIMATE_SLIDERS) + len(CLIMATE_SLIDER_CURSORS)
 
 
 # Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).

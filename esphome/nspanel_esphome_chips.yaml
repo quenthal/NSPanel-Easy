@@ -165,4 +165,12 @@ script:
           for (uint8_t i = 0; i < CHIP_COUNT; ++i) {
             chip_render(i);
           }
+
+  - id: !extend theme_applied
+    then:
+      - lambda: |-
+          // The Midnight theme draws the chips' state colors from its palette
+          for (uint8_t i = 0; i < CHIP_COUNT; ++i) {
+            chip_render(i);
+          }
 ...

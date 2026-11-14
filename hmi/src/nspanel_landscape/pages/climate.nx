@@ -25,6 +25,10 @@ on climate.load:
   button08.font=button_font.val
   button09.font=button_font.val
   button_back.font=button_back_font
+  // The temperature is set with -/+ only; the sliders are not shown, and not touched
+  tsw climateslider,0
+  tsw slider_high,0
+  tsw slider_low,0
   // Page background follows the theme (theme_apply cannot reach another page's picture)
   // (its own pictures, with the round -/+ buttons and the mode tiles; the water heater keeps 0037/0064)
   if(theme==1)
@@ -62,16 +66,16 @@ on climate.load:
     target_high.picc=climate.pic
     // Preset mode button: secondary color
     preset_button.picc=climate.pic
-    // Sliders: thin track with a round knob
+    // Sliders: not shown (pictures of the background), they keep the values the -/+ buttons step
     climateslider.pic=@pic(picture-0154)
     climateslider.pic1=@pic(picture-0155)
-    climateslider.pic2=@pic(picture-0137)
+    climateslider.pic2=@pic(picture-0168)
     slider_high.pic=@pic(picture-0164)
     slider_high.pic1=@pic(picture-0165)
-    slider_high.pic2=@pic(picture-0137)
+    slider_high.pic2=@pic(picture-0168)
     slider_low.pic=@pic(picture-0164)
     slider_low.pic1=@pic(picture-0165)
-    slider_low.pic2=@pic(picture-0137)
+    slider_low.pic2=@pic(picture-0168)
     // Tile buttons and their labels crop the tile picture (the firmware switches it for the active ones)
     button03.picc=@pic(picture-0160)
     button07.picc=@pic(picture-0160)

@@ -96,6 +96,28 @@ constexpr uint16_t RGB565_MIDNIGHT_TEXT = 63422;    ///< Main text, #F2F4F7 (RGB
 constexpr uint16_t RGB565_MIDNIGHT_TEXT_SECONDARY = 40246;  ///< Secondary text, #9AA4B2 (RGB565: 0x9D36)
 constexpr uint16_t RGB565_MIDNIGHT_NAVIGATION = 27568;      ///< Navigation, #6C7685 (RGB565: 0x6BB0)
 constexpr uint16_t RGB565_MIDNIGHT_UNSUPPORTED = 14858;     ///< Unavailable, #3A4352 (RGB565: 0x3A0A)
+
+/**
+ * @brief The Midnight color for one of the state colors above.
+ *
+ * Warm states take the amber, cool ones the blue and the grays the Midnight grays; alerts, green
+ * and any other color (e.g. one chosen in the Blueprint) are kept.
+ *
+ * @param color A state color.
+ * @return The color to draw with the Midnight theme.
+ */
+constexpr uint16_t midnight(uint16_t color) {
+  return (color == RGB565_DEEP_ORANGE || color == RGB565_ORANGE || color == RGB565_YELLOW ||
+          color == RGB565_YELLOW_GOLDEN)
+             ? RGB565_MIDNIGHT_AMBER
+         : (color == RGB565_BLUE || color == RGB565_CYAN || color == RGB565_CYAN_BRIGHT ||
+            color == RGB565_BLUE_BLUETOOTH)
+             ? RGB565_MIDNIGHT_BLUE
+         : (color == RGB565_GRAY || color == RGB565_GRAY_LIGHT || color == RGB565_GRAY_MOSS)
+             ? RGB565_MIDNIGHT_TEXT_SECONDARY
+         : (color == RGB565_GRAY_DARK || color == RGB565_GRAY_DARKEST) ? RGB565_MIDNIGHT_UNSUPPORTED
+                                                                       : color;
+}
 }  // namespace Colors
 
 // =============================================================================
