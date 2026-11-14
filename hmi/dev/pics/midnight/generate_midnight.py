@@ -373,6 +373,51 @@ def light_page(out_dir: Path, mdi_font) -> int:
     return written + 1
 
 
+# Climate page (landscape only), both themes: round -/+ buttons beside the target temperature,
+# thin picture sliders, and tiles for the HVAC modes. Its own backgrounds, so the water heater
+# keeps picture-0037/0064.
+CLIMATE_BG = {"light": 152, "dark": 153}
+CLIMATE_ROUND = [((24, 56), "-"), ((396, 56), "+")]  # top-left of each 60x60 button, and its sign
+CLIMATE_TILES = [(8 + 66 * i, 262, 8 + 66 * i + 61, 315) for i in range(7)]
+CLIMATE_SLIDER = (360, 36)
+CLIMATE_SLIDERS = {  # slot -> (theme, part, top-left of the slider on the page)
+    154: ("light", "track", None), 155: ("light", "fill", None),
+    156: ("dark", "track", (60, 160)), 157: ("dark", "fill", (60, 160)),  # climateslider and slider_high
+    158: ("dark", "track", (60, 194)), 159: ("dark", "fill", (60, 194)),  # slider_low
+}
+
+
+def climate_page(out_dir: Path) -> int:
+    for theme, slot in CLIMATE_BG.items():
+        dark = theme == "dark"
+        surface = (0x29, 0x2C, 0x29) if dark else TILE
+        shapes = [(x0, y0, x1, y1, 12, surface) for x0, y0, x1, y1 in CLIMATE_TILES]
+        shapes += [(x, y, x + 59, y + 59, 30, surface) for (x, y), _ in CLIMATE_ROUND]
+        base = Image.open(PICS_DIR / "background/background_dark_landscape.png") if dark else None
+        picture = shapes_background(shapes, SIZES["landscape"], base)
+        draw = ImageDraw.Draw(picture)
+        sign = (0xFF, 0xFF, 0xFF) if dark else TEXT
+        for (x, y), kind in CLIMATE_ROUND:
+            cx, cy = x + 30, y + 30
+            draw.rectangle((cx - 11, cy - 1, cx + 11, cy + 1), fill=sign)
+            if kind == "+":
+                draw.rectangle((cx - 1, cy - 11, cx + 1, cy + 11), fill=sign)
+        picture.convert("RGB").save(out_dir / f"picture-{slot:04d}.png")
+    blue = sprite_color("cover/cover_slider_active.png")
+    for slot, (theme, part, place) in CLIMATE_SLIDERS.items():
+        if theme == "dark":
+            color = blue if part == "fill" else (0x29, 0x2C, 0x29)
+            picture = thin_track(CLIMATE_SLIDER, color, False)
+            under = wave(place, CLIMATE_SLIDER)
+            mask = thin_track(CLIMATE_SLIDER, (255, 255, 255), False, background=(0, 0, 0)).convert("L")
+            under.paste(picture, mask=mask)
+            picture = under
+        else:
+            picture = thin_track(CLIMATE_SLIDER, BLUE if part == "fill" else SURFACE, False)
+        picture.save(out_dir / f"picture-{slot:04d}.png")
+    return len(CLIMATE_BG) + len(CLIMATE_SLIDERS)
+
+
 # Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).
 # The slider shows its pic1 from the start to the value, and its pic after it.
 COVER_SLIDER_SIZE = (420, 36)
@@ -383,8 +428,8 @@ COVER_SLIDERS = {  # dark slot -> (theme, part, top-left of the slider on the pa
 }  # the Midnight ones (105, 107, 109, 111, 112, 113) are thin sliders, see THIN_SLIDERS
 
 
-def shapes_background(shapes: list, size: tuple) -> Image.Image:
-    picture = Image.new("RGBA", size, BG + (255,))
+def shapes_background(shapes: list, size: tuple, base: Image.Image = None) -> Image.Image:
+    picture = base.convert("RGBA") if base is not None else Image.new("RGBA", size, BG + (255,))
     draw = ImageDraw.Draw(picture)
     tiles = Image.new("L", size, 0)
     for x0, y0, x1, y1, radius, color in shapes:
@@ -466,6 +511,7 @@ def generate(orientation: str, mdi_font=None) -> int:
             written += 1
         written += midnight_sliders(out_dir)
         written += light_page(out_dir, mdi_font)
+        written += climate_page(out_dir)
     print(f"{orientation}: wrote {written} pictures to {out_dir}")
     return written
 

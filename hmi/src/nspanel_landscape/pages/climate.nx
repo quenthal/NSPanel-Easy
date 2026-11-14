@@ -26,19 +26,21 @@ on climate.load:
   button09.font=button_font.val
   button_back.font=button_back_font
   // Page background follows the theme (theme_apply cannot reach another page's picture)
+  // (its own pictures, with the round -/+ buttons and the mode tiles; the water heater keeps 0037/0064)
   if(theme==1)
   {
-    b[0].pic=@pic(picture-0064)
+    b[0].pic=@pic(picture-0152)
   }else
   {
-    b[0].pic=@pic(picture-0037)
+    b[0].pic=@pic(picture-0153)
   }
   if(theme==1)
   {
-    // page_label (6), slider_high (7, picc=track bg), target_icon (8),
+    // page_label (6); slider_high (7) is a picture slider, themed below; target_icon (8),
     // value01_icon..value04_icon, value01..value04 (9-16),
     // button01..button07 (17-23)
-    for(sys0=6;sys0<=23;sys0++)
+    page_label.picc=climate.pic
+    for(sys0=8;sys0<=23;sys0++)
     {
       b[sys0].picc=climate.pic
     }
@@ -60,10 +62,16 @@ on climate.load:
     target_high.picc=climate.pic
     // Preset mode button: secondary color
     preset_button.picc=climate.pic
-    // Sliders use picc1 for the track background
-    slider_high.picc1=climate.pic
-    slider_low.picc1=climate.pic
-    climateslider.picc1=climate.pic
+    // Sliders: thin track with a round knob
+    climateslider.pic=@pic(picture-0154)
+    climateslider.pic1=@pic(picture-0155)
+    climateslider.pic2=@pic(picture-0137)
+    slider_high.pic=@pic(picture-0154)
+    slider_high.pic1=@pic(picture-0155)
+    slider_high.pic2=@pic(picture-0137)
+    slider_low.pic=@pic(picture-0154)
+    slider_low.pic1=@pic(picture-0155)
+    slider_low.pic2=@pic(picture-0137)
     // button_back
     button_back.pco=color_pco_navigation
     button_back.picc=climate.pic
