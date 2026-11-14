@@ -14,7 +14,7 @@ blueprint:
 
     This project enables comprehensive configuration of your NSPanel through a Blueprint featuring a user interface.
 
-  source_url: https://raw.githubusercontent.com/edwardtfn/NSPanel-Easy/refs/tags/latest/nspanel_easy_blueprint.yaml
+  source_url: https://raw.githubusercontent.com/quenthal/NSPanel-Easy/refs/heads/ui/midnight/nspanel_easy_blueprint.yaml
   domain: automation
   homeassistant:
     min_version: 2026.10.0
