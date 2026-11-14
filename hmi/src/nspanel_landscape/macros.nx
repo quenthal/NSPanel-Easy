@@ -10,6 +10,7 @@ macro theme_apply:
     // LIGHT theme
     // global background
     pic_background_main=48
+    pic_background_home=@pic(picture-0134)
     // home page - weather pic
     if(home.weather.pic<48)
     {
@@ -32,6 +33,7 @@ macro theme_apply:
     // DARK theme
     // global background
     pic_background_main=0
+    pic_background_home=0
     // home page - weather pic
     if(home.weather.pic>48)
     {
@@ -53,55 +55,55 @@ macro theme_apply:
   // Page backgrounds are set by each page's load event (home, climate): a page's own
   // picture cannot be reached from another page, and the page reloads after this macro
   // home time, date and temperatures
-  home.time.picc=pic_background_main
+  home.time.picc=pic_background_home
   home.time.pco=color_pco_main
-  home.indr_temp.picc=pic_background_main
+  home.indr_temp.picc=pic_background_home
   home.indr_temp.pco=color_pco_main
-  home.outdoor_temp.picc=pic_background_main
+  home.outdoor_temp.picc=pic_background_home
   home.outdoor_temp.pco=color_pco_main
-  home.date.picc=pic_background_main
+  home.date.picc=pic_background_home
   home.date.pco=color_pco_main
-  home.indr_temp_icon.picc=pic_background_main
+  home.indr_temp_icon.picc=pic_background_home
   home.indr_temp_icon.pco=color_pco_main
-  home.meridiem.picc=pic_background_main
+  home.meridiem.picc=pic_background_home
   home.meridiem.pco=color_pco_main
   // home hw button's labels
-  home.right_bt_text.picc=pic_background_main
-  home.left_bt_text.picc=pic_background_main
-  home.wifi_icon.picc=pic_background_main
-  home.bt_icon.picc=pic_background_main
+  home.right_bt_text.picc=pic_background_home
+  home.left_bt_text.picc=pic_background_home
+  home.wifi_icon.picc=pic_background_home
+  home.bt_icon.picc=pic_background_home
   // home values 01-04
-  home.value01.picc=pic_background_main
-  home.value01_icon.picc=pic_background_main
-  home.value02.picc=pic_background_main
-  home.value02_icon.picc=pic_background_main
-  home.value03.picc=pic_background_main
-  home.value03_icon.picc=pic_background_main
-  home.value04.picc=pic_background_main
-  home.value04_icon.picc=pic_background_main
+  home.value01.picc=pic_background_home
+  home.value01_icon.picc=pic_background_home
+  home.value02.picc=pic_background_home
+  home.value02_icon.picc=pic_background_home
+  home.value03.picc=pic_background_home
+  home.value03_icon.picc=pic_background_home
+  home.value04.picc=pic_background_home
+  home.value04_icon.picc=pic_background_home
   // home chips
-  home.chip_relay1.picc=pic_background_main
-  home.chip_relay2.picc=pic_background_main
-  home.chip_climate.picc=pic_background_main
-  home.chip01.picc=pic_background_main
-  home.chip02.picc=pic_background_main
-  home.chip03.picc=pic_background_main
-  home.chip04.picc=pic_background_main
-  home.chip05.picc=pic_background_main
-  home.chip06.picc=pic_background_main
-  home.chip07.picc=pic_background_main
+  home.chip_relay1.picc=pic_background_home
+  home.chip_relay2.picc=pic_background_home
+  home.chip_climate.picc=pic_background_home
+  home.chip01.picc=pic_background_home
+  home.chip02.picc=pic_background_home
+  home.chip03.picc=pic_background_home
+  home.chip04.picc=pic_background_home
+  home.chip05.picc=pic_background_home
+  home.chip06.picc=pic_background_home
+  home.chip07.picc=pic_background_home
   // home buttons
-  home.bt_notific.picc=pic_background_main
-  home.bt_qrcode.picc=pic_background_main
-  home.bt_entities.picc=pic_background_main
-  home.button07.picc=pic_background_main
-  home.button01.picc=pic_background_main
-  home.button02.picc=pic_background_main
-  home.button03.picc=pic_background_main
-  home.button04.picc=pic_background_main
-  home.button05.picc=pic_background_main
-  home.button06.picc=pic_background_main
-  home.bt_utilities.picc=pic_background_main
+  home.bt_notific.picc=pic_background_home
+  home.bt_qrcode.picc=pic_background_home
+  home.bt_entities.picc=pic_background_home
+  home.button07.picc=pic_background_home
+  home.button01.picc=pic_background_home
+  home.button02.picc=pic_background_home
+  home.button03.picc=pic_background_home
+  home.button04.picc=pic_background_home
+  home.button05.picc=pic_background_home
+  home.button06.picc=pic_background_home
+  home.bt_utilities.picc=pic_background_home
 
 macro format_tenths:
   // Formats a value in tenths as text, with one decimal only when the step is not a whole number

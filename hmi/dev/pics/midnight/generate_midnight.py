@@ -11,7 +11,8 @@
 # same way, but restyled first: the plain shapes (tiles, sliders, pills) are
 # recolored from their alpha with the palette below, and the colored artwork
 # (weather, vacuum, color wheel) is placed as it is. Slots shared by both
-# themes (splash, slider cursors) are left alone.
+# themes (splash, slider cursors) are left alone. The landscape home page
+# also gets its own background (HOME_SLOT), drawn from HOME_SHAPES.
 #
 # Usage:
 #   python3 generate_midnight.py [landscape|portrait|all]   (default: all)
@@ -23,7 +24,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from PIL import Image, ImageChops, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter
 
 PICS_DIR = Path(__file__).resolve().parent.parent
 SRC_ROOT = PICS_DIR.parent.parent / "src"
@@ -137,6 +138,32 @@ for n in range(1, 6):
     STYLES[f"fan_mode_{n}_inactive_light"] = tint(SURFACE)
 
 
+# Home page background (landscape only, its own slot after the mapped pictures):
+# the shapes behind the home components, as (x0, y0, x1, y1, radius, color).
+HOME_SLOT = 134
+HOME_SHAPES = {
+    "landscape": [
+        (8, 34, 471, 166, 18, SURFACE_HI),  # card outline: temperatures, time, weather, values
+        (10, 36, 469, 164, 16, BG),         # card inside, plain so the weather picture blends in
+        (236, 46, 237, 154, 0, SURFACE_HI),  # card divider
+        (8, 216, 117, 280, 16, SURFACE),    # tiles for button01..button04
+        (125, 216, 234, 280, 16, SURFACE),
+        (242, 216, 351, 280, 16, SURFACE),
+        (359, 216, 468, 280, 16, SURFACE),
+        (8, 284, 471, 318, 12, SURFACE),    # strip behind the hardware buttons' labels
+        (239, 290, 240, 312, 0, SURFACE_HI),  # strip divider
+    ],
+}
+
+
+def home_background(orientation: str, size: tuple) -> Image.Image:
+    picture = Image.new("RGBA", size, BG + (255,))
+    draw = ImageDraw.Draw(picture)
+    for x0, y0, x1, y1, radius, color in HOME_SHAPES[orientation]:
+        draw.rounded_rectangle((x0, y0, x1, y1), radius, fill=color)
+    return picture
+
+
 def source_for(src: str) -> str:
     """The light theme's own artwork is drawn for a white background: use the dark one."""
     src = src.replace("weather/light/", "weather/dark/")
@@ -172,6 +199,9 @@ def generate(orientation: str) -> int:
         if target.exists() and Image.open(target).size != picture.size:
             raise SystemExit(f"ERROR: {entry['id']}: size {picture.size} differs from {target.name}")
         picture.convert("RGB").save(target)
+        written += 1
+    if orientation in HOME_SHAPES:
+        home_background(orientation, size).convert("RGB").save(out_dir / f"picture-{HOME_SLOT:04d}.png")
         written += 1
     print(f"{orientation}: wrote {written} pictures to {out_dir}")
     return written
