@@ -179,6 +179,25 @@ struct ClimateView {
  */
 ClimateView climate_view(const SnapshotEntity &entity);
 
+// Tiles of the landscape climate page: each mode or device button, and its label, crops one of these
+// full-page pictures, so a hidden button leaves no empty tile behind
+static constexpr uint8_t CLIMATE_TILES_PIC_LIGHT = 160;     ///< Midnight tiles
+static constexpr uint8_t CLIMATE_TILES_ON_PIC_LIGHT = 161;  ///< Midnight tiles, active (amber)
+static constexpr uint8_t CLIMATE_TILES_PIC_DARK = 162;      ///< Dark-theme tiles
+static constexpr uint8_t CLIMATE_TILES_ON_PIC_DARK = 163;   ///< Dark-theme tiles, active
+
+/**
+ * @brief Draw one tile button of the climate page (an HVAC mode or a custom button) and its label.
+ *
+ * Only heating and off are shown of the HVAC modes; the other modes stay hidden.
+ *
+ * @param name Button component name, without page prefix.
+ * @param shown Whether the button is shown.
+ * @param active Whether its mode is the current one, or its entity is on.
+ * @param color Icon color.
+ */
+void climate_tile_draw(const char *name, bool shown, bool active, uint16_t color);
+
 /**
  * @brief Draw the HVAC mode buttons of a Home Assistant climate: only its modes, the current one highlighted.
  *

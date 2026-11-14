@@ -66,12 +66,21 @@ on climate.load:
     climateslider.pic=@pic(picture-0154)
     climateslider.pic1=@pic(picture-0155)
     climateslider.pic2=@pic(picture-0137)
-    slider_high.pic=@pic(picture-0154)
-    slider_high.pic1=@pic(picture-0155)
+    slider_high.pic=@pic(picture-0164)
+    slider_high.pic1=@pic(picture-0165)
     slider_high.pic2=@pic(picture-0137)
-    slider_low.pic=@pic(picture-0154)
-    slider_low.pic1=@pic(picture-0155)
+    slider_low.pic=@pic(picture-0164)
+    slider_low.pic1=@pic(picture-0165)
     slider_low.pic2=@pic(picture-0137)
+    // Tile buttons and their labels crop the tile picture (the firmware switches it for the active ones)
+    button03.picc=@pic(picture-0160)
+    button07.picc=@pic(picture-0160)
+    button08.picc=@pic(picture-0160)
+    button09.picc=@pic(picture-0160)
+    lbl_heat.picc=@pic(picture-0160)
+    lbl_off.picc=@pic(picture-0160)
+    button08_lbl.picc=@pic(picture-0160)
+    button09_lbl.picc=@pic(picture-0160)
     // button_back
     button_back.pco=color_pco_navigation
     button_back.picc=climate.pic
@@ -497,3 +506,31 @@ on timer2.timer:
 
 on preset_button.down:
   preset_button.pco=31
+
+on lbl_heat.down:
+  // The label is part of the tile: it presses the button
+  click button03,1
+
+on lbl_heat.up:
+  click button03,0
+
+on lbl_off.down:
+  // The label is part of the tile: it presses the button
+  click button07,1
+
+on lbl_off.up:
+  click button07,0
+
+on button08_lbl.down:
+  // The label is part of the tile: it presses the button
+  click button08,1
+
+on button08_lbl.up:
+  click button08,0
+
+on button09_lbl.down:
+  // The label is part of the tile: it presses the button
+  click button09,1
+
+on button09_lbl.up:
+  click button09,0

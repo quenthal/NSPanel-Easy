@@ -13,7 +13,11 @@
 #include "esphome/components/nextion/nextion.h"
 #include "esphome/core/helpers.h"  // For parse_number
 #include "esphome/core/log.h"
-#include "pages.h"  // For get_page_id
+#include "pages.h"  // For get_page_id and current_page_id
+
+#ifdef NSPANEL_EASY_HW_DISPLAY
+#include "hw_display.h"  // For current_theme
+#endif                   // NSPANEL_EASY_HW_DISPLAY
 
 #ifdef NSPANEL_EASY_PAGE_BUTTONS
 #include "page_buttons.h"  // For button_draw
@@ -128,6 +132,62 @@ ClimateView climate_view(const SnapshotEntity &entity) {
   return view;
 }
 
+/**
+ * @brief Label shown beside a tile button of the climate page.
+ *
+ * @param name Button component name.
+ * @return The label component name, or nullptr when the button has none.
+ */
+static const char *climate_tile_label(const char *name) {
+  if (strcmp(name, "button03") == 0) {
+    return "lbl_heat";
+  } else if (strcmp(name, "button07") == 0) {
+    return "lbl_off";
+  } else if (strcmp(name, "button08") == 0) {
+    return "button08_lbl";
+  } else if (strcmp(name, "button09") == 0) {
+    return "button09_lbl";
+  }  // if (name)
+  return nullptr;
+}
+
+void climate_tile_draw(const char *name, bool shown, bool active, uint16_t color) {
+  if (nextion_display == nullptr) {
+    return;
+  }  // if (no display)
+  const bool tile_button = strcmp(name, "button03") == 0 || strcmp(name, "button07") == 0 ||
+                           strcmp(name, "button08") == 0 || strcmp(name, "button09") == 0;
+  shown = shown && tile_button;  // the other HVAC modes are not shown on this page
+  const char *label = climate_tile_label(name);
+  if (!shown) {
+    nextion_display->hide_component(name);
+    if (label != nullptr) {
+      nextion_display->hide_component(label);
+    }  // if (label)
+    return;
+  }  // if (!shown)
+#ifdef NSPANEL_EASY_HW_DISPLAY
+  const bool light_theme = (current_theme == ThemeMode::LIGHT);
+#else   // NSPANEL_EASY_HW_DISPLAY
+  const bool light_theme = false;
+#endif  // NSPANEL_EASY_HW_DISPLAY
+  // Amber means "on": an active off mode keeps the plain tile, only its text stands out
+  const bool amber = active && strcmp(name, "button07") != 0;
+  const uint8_t tiles = light_theme ? (amber ? CLIMATE_TILES_ON_PIC_LIGHT : CLIMATE_TILES_PIC_LIGHT)
+                                    : (amber ? CLIMATE_TILES_ON_PIC_DARK : CLIMATE_TILES_PIC_DARK);
+  if (light_theme) {
+    color = active ? Colors::RGB565_MIDNIGHT_TEXT : Colors::RGB565_MIDNIGHT_TEXT_SECONDARY;
+  }  // if (light_theme)
+  nextion_display->send_command_printf("climate.%s.picc=%" PRIu8, name, tiles);
+  nextion_display->send_command_printf("climate.%s.pco=%" PRIu16, name, color);
+  nextion_display->show_component(name);
+  if (label != nullptr) {
+    nextion_display->send_command_printf("climate.%s.picc=%" PRIu8, label, tiles);
+    nextion_display->send_command_printf("climate.%s.pco=%s", label, active ? "color_pco_main" : "color_pco_secondary");
+    nextion_display->show_component(label);
+  }  // if (label)
+}
+
 void climate_mode_buttons_render(const SnapshotEntity &entity) {
   if (nextion_display == nullptr) {
     return;
@@ -136,13 +196,8 @@ void climate_mode_buttons_render(const SnapshotEntity &entity) {
   for (const ClimateModeButton &button : CLIMATE_MODE_BUTTONS) {
     const bool supported =
         modes != nullptr && std::find(modes->begin(), modes->end(), button.hvac_mode) != modes->end();
-    if (supported) {
-      nextion_display->show_component(button.name);
-      nextion_display->set_component_font_color(
-          button.font_color_path, (entity.state == button.hvac_mode) ? button.color_active : button.color_inactive);
-    } else {
-      nextion_display->hide_component(button.name);
-    }  // if (supported)
+    const bool active = entity.state == button.hvac_mode;
+    climate_tile_draw(button.name, supported, active, active ? button.color_active : button.color_inactive);
   }  // for (button : CLIMATE_MODE_BUTTONS)
 }
 
@@ -234,6 +289,10 @@ void climate_sub_render(const SubBinding &binding, const SubRuntime &rt, const c
   // Drawn as the other buttons, so every button surface follows the same rules; only while the page is shown
   button_draw(get_page_id("climate"), binding.component, false, icon, color, 0, "", "", false, true, available, 1);
 #endif  // NSPANEL_EASY_PAGE_BUTTONS
+  // An "on" device is an active (amber) tile
+  if (current_page_id == get_page_id("climate")) {
+    climate_tile_draw(binding.component, true, active && available, color);
+  }  // if (climate page shown)
 }
 #endif  // NSPANEL_EASY_SUBSCRIBE
 
