@@ -239,10 +239,10 @@ txt = ""
 name = "button_back"
 type = "button"
 sendkey = 3
-x = 385
+x = 0
 y = 0
-w = 95
-h = 48
+w = 52
+h = 44
 sta = 0
 style = 0
 font = "font-08"
@@ -251,7 +251,7 @@ bco = "#000000"
 picc2 = "picture-0000"
 bco2 = "#000000"
 pco = "#848284"
-txt = ""
+txt = ""
 txt_maxl = 3
 
 [[component]]
