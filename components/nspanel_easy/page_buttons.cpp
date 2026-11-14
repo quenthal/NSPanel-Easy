@@ -76,7 +76,10 @@ void button_draw(uint8_t page_id, const char *button_id, bool state, const char 
   const uint8_t button_pic_id = light_theme ? BUTTON_PIC_LIGHT : BUTTON_PIC_DARK;
   const uint8_t button_pressed_pic_id = light_theme ? BUTTON_PIC_LIGHT_PRESSED : BUTTON_PIC_DARK_PRESSED;
   const uint16_t pic_id = effective_state ? button_pressed_pic_id : button_pic_id;
-  const uint16_t fg_color = effective_state ? Colors::RGB565_BLUE_INDIGO : Colors::RGB565_WHITE;
+  // Midnight (light slot) draws "on" as an amber tile, which keeps the main text color
+  const uint16_t fg_color = light_theme       ? Colors::RGB565_MIDNIGHT_TEXT
+                            : effective_state ? Colors::RGB565_BLUE_INDIGO
+                                              : Colors::RGB565_WHITE;
 
   // Nextion object name limit: 14 chars + NUL = 15
   // Longest case: "button07" (8) + "icon"/"text" (4) = 12 chars - within limit

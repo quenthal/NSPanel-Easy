@@ -25,6 +25,14 @@ on climate.load:
   button08.font=button_font.val
   button09.font=button_font.val
   button_back.font=button_back_font
+  // Page background follows the theme (theme_apply cannot reach another page's picture)
+  if(theme==1)
+  {
+    b[0].pic=@pic(picture-0064)
+  }else
+  {
+    b[0].pic=@pic(picture-0037)
+  }
   if(theme==1)
   {
     // page_label (6), slider_high (7, picc=track bg), target_icon (8),

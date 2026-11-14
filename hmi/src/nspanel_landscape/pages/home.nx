@@ -1,5 +1,7 @@
 on home.load:
   back_page_id=home_page_id
+  // Page background follows the theme (theme_apply cannot reach another page's picture)
+  b[0].pic=pic_background_main
   // restore chips
   for(sys0=11;sys0<=20;sys0++)
   {

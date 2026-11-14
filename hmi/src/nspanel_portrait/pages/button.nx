@@ -9,6 +9,7 @@ on button.load:
   page_label.picc=pic_background_main
   button_back.font=button_back_font
   button_back.pco=color_pco_navigation
+  button_back.picc=pic_background_main
   button_back.picc2=pic_background_main
   dim=brightness
   sendme

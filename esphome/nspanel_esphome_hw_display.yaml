@@ -16,14 +16,22 @@ substitutions:
   THEME_DARK_COLOR_PCO_SECONDARY: ${COLOR_GRAY_LIGHT}      # Foreground font color for secondary information
   THEME_DARK_COLOR_PCO_NAVIGATION: ${COLOR_GRAY_MOSS}      # Foreground font color for navigation components, like back button or page index
   THEME_DARK_COLOR_PCO_UNSUPPORTED: ${COLOR_GRAY_DARKEST}  #  Foreground font color for unsupported or unavailable components
-  THEME_LIGHT_LABEL: Light (Under construction)
-  THEME_LIGHT_COLOR_PCO_MAIN: ${COLOR_BLACK}               # BLACK - main text on white bg
-  THEME_LIGHT_COLOR_PCO_SECONDARY: ${COLOR_GRAY_MEDIUM}    # Mid gray for secondary
-  THEME_LIGHT_COLOR_PCO_NAVIGATION: ${COLOR_GRAY_DARK}     # Colors::RGB565_GRAY_DARK for navigation
-  THEME_LIGHT_COLOR_PCO_UNSUPPORTED: ${COLOR_GRAY_LIGHT}   # Light gray - visually "faded"
+  THEME_DARK_COLOR_PCO_HIGHLIGHT: ${COLOR_BLUE_PURE}       # Foreground font color for highlighted or pending-action components
+  THEME_DARK_COLOR_BCO_MAIN: ${COLOR_BLACK}                # Background color for pages and components drawn without a picture
+  THEME_DARK_COLOR_BCO_SURFACE: ${COLOR_BLUE_INDIGO}       # Background color for tracks and tiles drawn without a picture
+  # The light slot holds the Midnight theme: navy background, amber for "on", blue for "selected"
+  THEME_LIGHT_LABEL: Midnight
+  THEME_LIGHT_COLOR_PCO_MAIN: ${COLOR_MIDNIGHT_TEXT}
+  THEME_LIGHT_COLOR_PCO_SECONDARY: ${COLOR_MIDNIGHT_TEXT_SECONDARY}
+  THEME_LIGHT_COLOR_PCO_NAVIGATION: ${COLOR_MIDNIGHT_NAVIGATION}
+  THEME_LIGHT_COLOR_PCO_UNSUPPORTED: ${COLOR_MIDNIGHT_UNSUPPORTED}
+  THEME_LIGHT_COLOR_PCO_HIGHLIGHT: ${COLOR_MIDNIGHT_BLUE}
+  THEME_LIGHT_COLOR_BCO_MAIN: ${COLOR_MIDNIGHT_BG}
+  THEME_LIGHT_COLOR_BCO_SURFACE: ${COLOR_MIDNIGHT_SURFACE}
   button_back_font: "8"
   COLOR_BLACK: '0'              # Colors::RGB565_BLACK
   COLOR_BLUE_INDIGO: '10597'    # Colors::RGB565_BLUE_INDIGO
+  COLOR_BLUE_PURE: '31'         # Pure blue, the TFT default of color_pco_highlight
   COLOR_CYAN_BRIGHT: '7519'     # Colors::RGB565_CYAN_BRIGHT
   COLOR_GRAY_DARK: '16904'      # Colors::RGB565_GRAY_DARK
   COLOR_GRAY_DARKEST: '6339'    # Colors::RGB565_GRAY_DARKEST
@@ -33,6 +41,13 @@ substitutions:
   COLOR_RED_PRIMARY: '63488'    # Colors::RGB565_RED
   COLOR_WHITE: '65535'          # Colors::RGB565_WHITE
   COLOR_YELLOW_GOLDEN: '64992'  # Colors::RGB565_YELLOW_GOLDEN
+  COLOR_MIDNIGHT_BG: '2211'               # Colors::RGB565_MIDNIGHT_BG
+  COLOR_MIDNIGHT_SURFACE: '6406'          # Colors::RGB565_MIDNIGHT_SURFACE
+  COLOR_MIDNIGHT_BLUE: '27998'            # Colors::RGB565_MIDNIGHT_BLUE
+  COLOR_MIDNIGHT_TEXT: '63422'            # Colors::RGB565_MIDNIGHT_TEXT
+  COLOR_MIDNIGHT_TEXT_SECONDARY: '40246'  # Colors::RGB565_MIDNIGHT_TEXT_SECONDARY
+  COLOR_MIDNIGHT_NAVIGATION: '27568'      # Colors::RGB565_MIDNIGHT_NAVIGATION
+  COLOR_MIDNIGHT_UNSUPPORTED: '14858'     # Colors::RGB565_MIDNIGHT_UNSUPPORTED
   GPIO_DISPLAY_POWER_PIN:
     number: 4
     inverted: true
@@ -540,6 +555,9 @@ script:
           disp1->send_command("color_pco_secondary=${THEME_DARK_COLOR_PCO_SECONDARY}");
           disp1->send_command("color_pco_navigation=${THEME_DARK_COLOR_PCO_NAVIGATION}");
           disp1->send_command("color_pco_unsupported=${THEME_DARK_COLOR_PCO_UNSUPPORTED}");
+          disp1->send_command("color_pco_highlight=${THEME_DARK_COLOR_PCO_HIGHLIGHT}");
+          disp1->send_command("color_bco_main=${THEME_DARK_COLOR_BCO_MAIN}");
+          disp1->send_command("color_bco_surface=${THEME_DARK_COLOR_BCO_SURFACE}");
 
   - id: theme_update_light
     mode: restart
@@ -550,6 +568,9 @@ script:
           disp1->send_command("color_pco_secondary=${THEME_LIGHT_COLOR_PCO_SECONDARY}");
           disp1->send_command("color_pco_navigation=${THEME_LIGHT_COLOR_PCO_NAVIGATION}");
           disp1->send_command("color_pco_unsupported=${THEME_LIGHT_COLOR_PCO_UNSUPPORTED}");
+          disp1->send_command("color_pco_highlight=${THEME_LIGHT_COLOR_PCO_HIGHLIGHT}");
+          disp1->send_command("color_bco_main=${THEME_LIGHT_COLOR_BCO_MAIN}");
+          disp1->send_command("color_bco_surface=${THEME_LIGHT_COLOR_BCO_SURFACE}");
 
   ###### Timers ######
   - id: timer_dim        # Handles the brightness dimming after a timeout

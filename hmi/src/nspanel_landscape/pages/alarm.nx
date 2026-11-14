@@ -11,6 +11,14 @@ on alarm.load:
     vis bt_vacat,0
     vis bt_bypass,0
   }
+  // Theme: this page is drawn with colors, not pictures
+  alarm.bco=color_bco_main
+  page_label.bco=color_bco_main
+  page_label.pco=color_pco_main
+  icon_state.bco=color_bco_main
+  button_back.bco=color_bco_main
+  button_back.bco2=color_bco_main
+  button_back.pco=color_pco_navigation
   button_back.font=button_back_font
   sendme
 

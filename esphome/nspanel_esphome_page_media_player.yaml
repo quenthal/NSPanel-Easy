@@ -192,7 +192,13 @@ script:
               disp1->set_component_value("prg_total", view.duration);
             }  // if (progress changed)
             // Active fill — explicit color, overrides design-time pco.
-            disp1->set_component_foreground_color("time_progress", ${COLOR_BLUE_INDIGO});
+            #ifdef NSPANEL_EASY_HW_DISPLAY
+            const bool light_theme = (current_theme == ThemeMode::LIGHT);
+            #else  // NSPANEL_EASY_HW_DISPLAY
+            const bool light_theme = false;
+            #endif  // NSPANEL_EASY_HW_DISPLAY
+            disp1->set_component_foreground_color("time_progress",
+                                                  light_theme ? Colors::RGB565_MIDNIGHT_BLUE : ${COLOR_BLUE_INDIGO});
           } else {
             // Empty bar: zero progress, theme-aware dim color, no animation.
             // Use the Nextion runtime variable color_pco_unsupported so

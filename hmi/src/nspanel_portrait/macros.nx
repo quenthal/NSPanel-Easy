@@ -17,8 +17,6 @@ macro theme_apply:
     }
     // buttons pages
     pic_button_off=79 // Background picture for non-pressed buttons on buttonpageXX
-    // climate page
-    climate.b[0].pic=@pic(picture-0064)
     // cover page
     cover.coverslider2.pic=@pic(picture-0112)
     cover.coverslider2.pic1=@pic(picture-0113)
@@ -41,8 +39,6 @@ macro theme_apply:
     }
     // buttons pages
     pic_button_off=46 // Background picture for non-pressed buttons on buttonpageXX
-    // climate page
-    climate.b[0].pic=@pic(picture-0037)
     // cover page
     cover.coverslider2.pic=@pic(picture-0020)
     cover.coverslider2.pic1=@pic(picture-0019)
@@ -54,14 +50,17 @@ macro theme_apply:
     fan.fanslider.pic=@pic(picture-0039)
     fan.fanslider.pic1=@pic(picture-0040)
   }
-  // set home page
-  home.b[0].pic=pic_background_main
+  // Page backgrounds are set by each page's load event (home, climate): a page's own
+  // picture cannot be reached from another page, and the page reloads after this macro
   // home time, date and temperatures
-  for(sys0=3;sys0<=6;sys0++)
-  {
-    home.b[sys0].picc=pic_background_main
-    home.b[sys0].pco=color_pco_main
-  }
+  home.time.picc=pic_background_main
+  home.time.pco=color_pco_main
+  home.indr_temp.picc=pic_background_main
+  home.indr_temp.pco=color_pco_main
+  home.outdoor_temp.picc=pic_background_main
+  home.outdoor_temp.pco=color_pco_main
+  home.date.picc=pic_background_main
+  home.date.pco=color_pco_main
   home.indr_temp_icon.picc=pic_background_main
   home.indr_temp_icon.pco=color_pco_main
   home.meridiem.picc=pic_background_main
@@ -80,19 +79,29 @@ macro theme_apply:
   home.value03_icon.picc=pic_background_main
   home.value04.picc=pic_background_main
   home.value04_icon.picc=pic_background_main
+  // home chips
+  home.chip_relay1.picc=pic_background_main
+  home.chip_relay2.picc=pic_background_main
+  home.chip_climate.picc=pic_background_main
+  home.chip01.picc=pic_background_main
+  home.chip02.picc=pic_background_main
+  home.chip03.picc=pic_background_main
+  home.chip04.picc=pic_background_main
+  home.chip05.picc=pic_background_main
+  home.chip06.picc=pic_background_main
+  home.chip07.picc=pic_background_main
   // home buttons
-  for(sys0=28;sys0<=31;sys0++)
-  {
-    home.b[sys0].picc=pic_background_main
-  }
-  for(sys0=35;sys0<=37;sys0++)
-  {
-    home.b[sys0].picc=pic_background_main
-  }
-  for(sys0=40;sys0<=43;sys0++)
-  {
-    home.b[sys0].picc=pic_background_main
-  }
+  home.bt_notific.picc=pic_background_main
+  home.bt_qrcode.picc=pic_background_main
+  home.bt_entities.picc=pic_background_main
+  home.button07.picc=pic_background_main
+  home.button01.picc=pic_background_main
+  home.button02.picc=pic_background_main
+  home.button03.picc=pic_background_main
+  home.button04.picc=pic_background_main
+  home.button05.picc=pic_background_main
+  home.button06.picc=pic_background_main
+  home.bt_utilities.picc=pic_background_main
 
 macro format_tenths:
   // Formats a value in tenths as text, with one decimal only when the step is not a whole number

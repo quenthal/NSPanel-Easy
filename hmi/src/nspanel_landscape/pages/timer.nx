@@ -7,6 +7,7 @@ on timer.load:
   timer.pic=pic_background_main
   if(theme==1)
   {
+    button_back.picc=pic_background_main
     button_back.picc2=pic_background_main
     icon_state.picc=pic_background_main
     page_label.picc=pic_background_main

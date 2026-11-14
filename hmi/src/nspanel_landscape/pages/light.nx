@@ -45,6 +45,10 @@ on light.load:
     lightslider.pic1=@pic(picture-0073)
     light_value.picc=pic_background_main
     light_value_2.picc=pic_background_main
+    ring.picc=pic_background_main
+    field.picc=pic_background_main
+    ring.pco=color_bco_main  // helper values, kept invisible
+    field.pco=color_bco_main
     // Temp control components
     temp_button.pic=@pic(picture-0077)
     temp_button.pic2=@pic(picture-0068)

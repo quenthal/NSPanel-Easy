@@ -27,10 +27,19 @@ on media_player.load:
     b[sys0].picc=pic_background_main
     b[sys0].pco=color_pco_main
   }
+  // Progress and volume tracks follow the theme (the fill is set by ESPHome)
+  if(theme==1)
+  {
+    time_progress.bco=color_bco_surface
+    vol_slider.bco=color_bco_surface
+    vol_slider.bco1=color_pco_highlight
+    vol_slider.pco=color_pco_main
+  }
   // Variables and timers (ids 18+) have no visual representation
   // and are skipped.
   button_back.font=button_back_font
   button_back.pco=color_pco_navigation
+  button_back.picc=pic_background_main
   button_back.picc2=pic_background_main
   dim=brightness
   sendme

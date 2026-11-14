@@ -86,6 +86,16 @@ constexpr uint16_t RGB565_RED = 63488;            ///< Alert/triggered state (RG
 constexpr uint16_t RGB565_WHITE = 65535;          ///< White/default (RGB565: 0xFFFF)
 constexpr uint16_t RGB565_YELLOW = 65024;         ///< Warning/pending state (RGB565: 0xFE00)
 constexpr uint16_t RGB565_YELLOW_GOLDEN = 64992;  ///< Golden yellow (RGB565: 0xFDE0)
+
+// Midnight theme palette (the theme in the light slot)
+constexpr uint16_t RGB565_MIDNIGHT_BG = 2211;       ///< Page background, #0E141D (RGB565: 0x08A3)
+constexpr uint16_t RGB565_MIDNIGHT_SURFACE = 6406;  ///< Tiles and tracks, #1A2230 (RGB565: 0x1906)
+constexpr uint16_t RGB565_MIDNIGHT_BLUE = 27998;    ///< Selected or informative accent, #6FA8F5 (RGB565: 0x6D5E)
+constexpr uint16_t RGB565_MIDNIGHT_AMBER = 62857;   ///< On or active accent, #F2B14C (RGB565: 0xF589)
+constexpr uint16_t RGB565_MIDNIGHT_TEXT = 63422;    ///< Main text, #F2F4F7 (RGB565: 0xF7BE)
+constexpr uint16_t RGB565_MIDNIGHT_TEXT_SECONDARY = 40246;  ///< Secondary text, #9AA4B2 (RGB565: 0x9D36)
+constexpr uint16_t RGB565_MIDNIGHT_NAVIGATION = 27568;      ///< Navigation, #6C7685 (RGB565: 0x6BB0)
+constexpr uint16_t RGB565_MIDNIGHT_UNSUPPORTED = 14858;     ///< Unavailable, #3A4352 (RGB565: 0x3A0A)
 }  // namespace Colors
 
 // =============================================================================

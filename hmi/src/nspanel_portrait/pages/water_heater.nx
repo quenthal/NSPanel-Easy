@@ -3,7 +3,14 @@ on water_heater.load:
   {
     page home_page_id
   }
-  water_heater.pic=climate.b[0].pic
+  // Same background as climate, for the theme (another page's picture cannot be read)
+  if(theme==1)
+  {
+    water_heater.pic=@pic(picture-0064)
+  }else
+  {
+    water_heater.pic=@pic(picture-0037)
+  }
   // page_label
   page_label.picc=water_heater.pic
   page_label.pco=color_pco_main

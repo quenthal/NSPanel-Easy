@@ -31,6 +31,7 @@ on entitypage04.load:
     b[sys0].pco=color_pco_main
   }
   button_back.font=button_back_font
+  button_back.picc=pic_background_main
   button_back.picc2=pic_background_main
   button_back.pco=color_pco_navigation
   page_index.pco=color_pco_navigation
