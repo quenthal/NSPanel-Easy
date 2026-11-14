@@ -6,34 +6,41 @@ on cover.load:
   // set background image and fg color to all components
   if(theme==1)
   {
-    cover.pic=pic_background_main
-    icon_state.picc=pic_background_main
+    // Own background, with the tiles behind open, stop and close
+    cover.pic=@pic(picture-0135)
+    icon_state.picc=cover.pic
     icon_state.pco=color_pco_main
-    page_label.picc=pic_background_main
+    page_label.picc=cover.pic
     page_label.pco=color_pco_main
     button_back.font=button_back_font
     button_back.pco=color_pco_navigation
-    button_back.picc=pic_background_main
-    button_back.picc2=pic_background_main
-    cover_value.picc=pic_background_main
+    button_back.picc=cover.pic
+    button_back.picc2=cover.pic
+    cover_value.picc=cover.pic
     cover_value.pco=color_pco_main
-    cover_value_2.picc=pic_background_main
+    cover_value_2.picc=cover.pic
     cover_value_2.pco=color_pco_main
-    tilt_value.picc=pic_background_main
+    tilt_value.picc=cover.pic
     tilt_value.pco=color_pco_main
-    battery_icon.picc=pic_background_main
+    battery_icon.picc=cover.pic
     battery_icon.pco=color_pco_main
-    battery_value.picc=pic_background_main
+    battery_value.picc=cover.pic
     battery_value.pco=color_pco_main
-    cover_open.picc=pic_background_main
-    cover_open.picc2=pic_background_main
+    cover_open.picc=cover.pic
+    cover_open.picc2=cover.pic
     cover_open.pco=color_pco_main
-    cover_close.picc=pic_background_main
-    cover_close.picc2=pic_background_main
+    cover_close.picc=cover.pic
+    cover_close.picc2=cover.pic
     cover_close.pco=color_pco_main
-    cover_stop.picc=pic_background_main
-    cover_stop.picc2=pic_background_main
+    cover_stop.picc=cover.pic
+    cover_stop.picc2=cover.pic
     cover_stop.pco=color_pco_main
+    lbl_open.picc=cover.pic
+    lbl_open.pco=color_pco_secondary
+    lbl_stop.picc=cover.pic
+    lbl_stop.pco=color_pco_secondary
+    lbl_close.picc=cover.pic
+    lbl_close.pco=color_pco_secondary
   }
   vis coverslider,0
   vis cover_value,0
@@ -127,3 +134,24 @@ on coverslider2.slide:
   cover_value_2.txt=va1.txt
   cover_value_2.txt+=home.units_sep.txt
   cover_value_2.txt+="%"
+
+on lbl_open.down:
+  // The label is part of the tile: it presses the button
+  click cover_open,1
+
+on lbl_open.up:
+  click cover_open,0
+
+on lbl_stop.down:
+  // The label is part of the tile: it presses the button
+  click cover_stop,1
+
+on lbl_stop.up:
+  click cover_stop,0
+
+on lbl_close.down:
+  // The label is part of the tile: it presses the button
+  click cover_close,1
+
+on lbl_close.up:
+  click cover_close,0

@@ -11,8 +11,10 @@
 # same way, but restyled first: the plain shapes (tiles, sliders, pills) are
 # recolored from their alpha with the palette below, and the colored artwork
 # (weather, vacuum, color wheel) is placed as it is. Slots shared by both
-# themes (splash, slider cursors) are left alone. The landscape home page
-# also gets its own background (HOME_SLOT), drawn from HOME_SHAPES.
+# themes (splash, slider cursors) are left alone. The landscape home and cover
+# pages also get their own backgrounds (HOME_SLOT, COVER_SLOT), and the
+# landscape cover sliders are redrawn horizontal for both themes
+# (COVER_SLIDERS), which replaces those dark-theme slots too.
 #
 # Usage:
 #   python3 generate_midnight.py [landscape|portrait|all]   (default: all)
@@ -24,7 +26,7 @@ import sys
 from pathlib import Path
 
 import yaml
-from PIL import Image, ImageChops, ImageDraw, ImageFilter
+from PIL import Image, ImageChops, ImageDraw, ImageFilter, ImageStat
 
 PICS_DIR = Path(__file__).resolve().parent.parent
 SRC_ROOT = PICS_DIR.parent.parent / "src"
@@ -143,24 +145,64 @@ for n in range(1, 6):
 HOME_SLOT = 134
 HOME_SHAPES = {
     "landscape": [
-        (8, 34, 471, 166, 18, SURFACE_HI),  # card outline: temperatures, time, weather, values
-        (10, 36, 469, 164, 16, BG),         # card inside, plain so the weather picture blends in
-        (236, 46, 237, 154, 0, SURFACE_HI),  # card divider
-        (8, 216, 117, 280, 16, SURFACE),    # tiles for button01..button04
-        (125, 216, 234, 280, 16, SURFACE),
-        (242, 216, 351, 280, 16, SURFACE),
-        (359, 216, 468, 280, 16, SURFACE),
-        (8, 284, 471, 318, 12, SURFACE),    # strip behind the hardware buttons' labels
-        (239, 290, 240, 312, 0, SURFACE_HI),  # strip divider
+        (240, 58, 241, 176, 0, SURFACE_HI),  # divider: indoor temperature | time, outdoor temperature, weather
+        (8, 198, 155, 278, 16, SURFACE),    # tiles for button01..button03
+        (166, 198, 313, 278, 16, SURFACE),
+        (324, 198, 471, 278, 16, SURFACE),
+        (239, 290, 240, 314, 0, SURFACE_HI),  # divider between the hardware buttons' labels
     ],
 }
 
 
-def home_background(orientation: str, size: tuple) -> Image.Image:
+# Cover page background (landscape only): the tiles behind open, stop and close
+COVER_SLOT = 135
+COVER_SHAPES = {
+    "landscape": [
+        (8, 206, 155, 282, 16, SURFACE),
+        (166, 206, 313, 282, 16, SURFACE),
+        (324, 206, 471, 282, 16, SURFACE),
+    ],
+}
+
+# Horizontal cover sliders (landscape only), for both themes: slot -> (theme, part).
+# The slider shows its pic1 from the start to the value, and its pic after it.
+COVER_SLIDER_SIZE = (420, 36)
+COVER_SLIDERS = {  # slot -> (theme, part, top-left of the slider on the page)
+    104: ("dark", "track", (30, 90)), 106: ("dark", "fill", (30, 90)),     # coverslider (above the tilt slider)
+    20: ("dark", "track", (30, 136)), 19: ("dark", "fill", (30, 136)),     # coverslider2 (alone)
+    108: ("dark", "track", (30, 164)), 110: ("dark", "fill", (30, 164)),   # tiltslider
+    105: ("light", "track", (30, 90)), 107: ("light", "fill", (30, 90)),
+    112: ("light", "track", (30, 136)), 113: ("light", "fill", (30, 136)),
+    109: ("light", "track", (30, 164)), 111: ("light", "fill", (30, 164)),
+}
+
+
+def shapes_background(shapes: list, size: tuple) -> Image.Image:
     picture = Image.new("RGBA", size, BG + (255,))
     draw = ImageDraw.Draw(picture)
-    for x0, y0, x1, y1, radius, color in HOME_SHAPES[orientation]:
+    for x0, y0, x1, y1, radius, color in shapes:
         draw.rounded_rectangle((x0, y0, x1, y1), radius, fill=color)
+    return picture
+
+
+def sprite_color(src: str) -> tuple:
+    """The average color of a sprite's opaque pixels, to keep the dark theme's own colors."""
+    sprite = Image.open(PICS_DIR / src).convert("RGBA")
+    opaque = sprite.getchannel("A").point(lambda a: 255 if a > 127 else 0)
+    return tuple(int(v) for v in ImageStat.Stat(sprite.convert("RGB"), mask=opaque).mean)
+
+
+def cover_slider(theme: str, part: str, place: tuple) -> Image.Image:
+    """A horizontal cover slider part, on the page background where the slider sits."""
+    w, h = COVER_SLIDER_SIZE
+    if theme == "dark":
+        background = Image.open(PICS_DIR / "background/background_dark_landscape.png").convert("RGB")
+        picture = background.crop((place[0], place[1], place[0] + w, place[1] + h))
+        color = sprite_color("cover/cover_slider_active.png" if part == "fill" else "cover/cover_slider_inactive.png")
+    else:
+        picture = Image.new("RGB", COVER_SLIDER_SIZE, BG)
+        color = BLUE if part == "fill" else SURFACE
+    ImageDraw.Draw(picture).rounded_rectangle((0, 0, w - 1, h - 1), h // 2, fill=color)
     return picture
 
 
@@ -196,13 +238,21 @@ def generate(orientation: str) -> int:
             canvas = background.copy()
             canvas.alpha_composite(sprite, (x, y))
             picture = canvas.crop((x, y, x + w, y + h))
-        if target.exists() and Image.open(target).size != picture.size:
+        redrawn = orientation == "landscape" and slot in COVER_SLIDERS  # replaced below, at another size
+        if target.exists() and not redrawn and Image.open(target).size != picture.size:
             raise SystemExit(f"ERROR: {entry['id']}: size {picture.size} differs from {target.name}")
         picture.convert("RGB").save(target)
         written += 1
     if orientation in HOME_SHAPES:
-        home_background(orientation, size).convert("RGB").save(out_dir / f"picture-{HOME_SLOT:04d}.png")
+        shapes_background(HOME_SHAPES[orientation], size).convert("RGB").save(out_dir / f"picture-{HOME_SLOT:04d}.png")
         written += 1
+    if orientation in COVER_SHAPES:
+        shapes_background(COVER_SHAPES[orientation], size).convert("RGB").save(out_dir / f"picture-{COVER_SLOT:04d}.png")
+        written += 1
+    if orientation == "landscape":
+        for slot, (theme, part, place) in COVER_SLIDERS.items():
+            cover_slider(theme, part, place).save(out_dir / f"picture-{slot:04d}.png")
+            written += 1
     print(f"{orientation}: wrote {written} pictures to {out_dir}")
     return written
 

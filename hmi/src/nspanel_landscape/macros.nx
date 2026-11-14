@@ -81,6 +81,17 @@ macro theme_apply:
   home.value03_icon.picc=pic_background_home
   home.value04.picc=pic_background_home
   home.value04_icon.picc=pic_background_home
+  // home title and tile labels
+  home.home_icon.picc=pic_background_home
+  home.home_icon.pco=color_pco_main
+  home.home_title.picc=pic_background_home
+  home.home_title.pco=color_pco_main
+  home.button01_label.picc=pic_background_home
+  home.button01_label.pco=color_pco_main
+  home.button02_label.picc=pic_background_home
+  home.button02_label.pco=color_pco_main
+  home.button03_label.picc=pic_background_home
+  home.button03_label.pco=color_pco_main
   // home chips
   home.chip_relay1.picc=pic_background_home
   home.chip_relay2.picc=pic_background_home

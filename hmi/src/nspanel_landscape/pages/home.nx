@@ -74,6 +74,22 @@ on home.load:
       vis value04_icon,sys2
     }
   }
+  // Midnight home: values, button04..07 and the navigation shortcuts are left to their own pages
+  vis value01,0
+  vis value01_icon,0
+  vis value02,0
+  vis value02_icon,0
+  vis value03,0
+  vis value03_icon,0
+  vis value04,0
+  vis value04_icon,0
+  vis button04,0
+  vis button05,0
+  vis button06,0
+  vis button07,0
+  vis bt_entities,0
+  vis bt_utilities,0
+  vis bt_qrcode,0
   // HW Button's labels
   if(display_mode==3)
   {
@@ -356,3 +372,24 @@ on short_click_tm.timer:
     printh FF FF FF
     click_comp.txt=""
   }
+
+on button01_label.down:
+  // The label is part of the tile: it presses the button
+  click button01,1
+
+on button01_label.up:
+  click button01,0
+
+on button02_label.down:
+  // The label is part of the tile: it presses the button
+  click button02,1
+
+on button02_label.up:
+  click button02,0
+
+on button03_label.down:
+  // The label is part of the tile: it presses the button
+  click button03,1
+
+on button03_label.up:
+  click button03,0
