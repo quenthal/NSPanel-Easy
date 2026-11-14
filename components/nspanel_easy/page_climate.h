@@ -187,16 +187,18 @@ static constexpr uint8_t CLIMATE_TILES_PIC_DARK = 162;      ///< Dark-theme tile
 static constexpr uint8_t CLIMATE_TILES_ON_PIC_DARK = 163;   ///< Dark-theme tiles, active
 
 /**
- * @brief Draw one tile button of the climate page (an HVAC mode or a custom button) and its label.
+ * @brief Draw one tile button of the climate page (heating or a custom button) and its label.
  *
- * Only heating and off are shown of the HVAC modes; the other modes stay hidden.
+ * Of the HVAC modes only heating is shown, as a toggle between heat and off; the other modes stay
+ * hidden. The heating tile also tells the page whether heating is on (`heat_on`), for its toggle.
  *
  * @param name Button component name, without page prefix.
  * @param shown Whether the button is shown.
- * @param active Whether its mode is the current one, or its entity is on.
+ * @param on Whether its mode is the current one, or its entity is on: bright icon and label.
+ * @param working Whether it is working right now (heating, or the device on): amber tile.
  * @param color Icon color.
  */
-void climate_tile_draw(const char *name, bool shown, bool active, uint16_t color);
+void climate_tile_draw(const char *name, bool shown, bool on, bool working, uint16_t color);
 
 /**
  * @brief Draw the HVAC mode buttons of a Home Assistant climate: only its modes, the current one highlighted.

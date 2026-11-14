@@ -345,7 +345,8 @@ script:
           for (const ClimateModeButton &button : CLIMATE_MODE_BUTTONS) {
             const climate::ClimateMode mode = static_cast<climate::ClimateMode>(button.mode);
             const bool active = thermostat_embedded->mode == mode;
-            climate_tile_draw(button.name, traits.supports_mode(mode), active,
+            const bool heating = thermostat_embedded->action == climate::CLIMATE_ACTION_HEATING;
+            climate_tile_draw(button.name, traits.supports_mode(mode), active, heating,
                               active ? button.color_active : button.color_inactive);
 
             if (current_page_id != get_page_id("climate")) return;

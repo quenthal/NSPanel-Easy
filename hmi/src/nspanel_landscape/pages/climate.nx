@@ -78,7 +78,6 @@ on climate.load:
     button08.picc=@pic(picture-0160)
     button09.picc=@pic(picture-0160)
     lbl_heat.picc=@pic(picture-0160)
-    lbl_off.picc=@pic(picture-0160)
     button08_lbl.picc=@pic(picture-0160)
     button09_lbl.picc=@pic(picture-0160)
     // button_back
@@ -329,10 +328,17 @@ on button02.up:
   printh FF FF FF
 
 on button03.up:
+  // Heating is a toggle: heat_on, kept by the firmware, tells which way
   printh 92
   prints "localevent",0
   printh 00
-  prints "climate,hvac_mode,heat",0
+  if(heat_on.val==1)
+  {
+    prints "climate,hvac_mode,off",0
+  }else
+  {
+    prints "climate,hvac_mode,heat",0
+  }
   printh 00
   printh FF FF FF
 
@@ -513,13 +519,6 @@ on lbl_heat.down:
 
 on lbl_heat.up:
   click button03,0
-
-on lbl_off.down:
-  // The label is part of the tile: it presses the button
-  click button07,1
-
-on lbl_off.up:
-  click button07,0
 
 on button08_lbl.down:
   // The label is part of the tile: it presses the button

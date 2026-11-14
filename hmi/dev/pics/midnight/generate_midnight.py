@@ -379,7 +379,7 @@ def light_page(out_dir: Path, mdi_font) -> int:
 # Its own pictures, so the water heater keeps picture-0037/0064.
 CLIMATE_BG = {"light": 152, "dark": 153}
 CLIMATE_ROUND = [((24, 60), "-"), ((396, 60), "+")]  # top-left of each 60x60 button, and its sign
-CLIMATE_TILES = [(8, 206, 235, 254), (244, 206, 471, 254),   # heating, off
+CLIMATE_TILES = [(8, 206, 471, 254),                         # heating (a toggle with off)
                  (8, 262, 235, 310), (244, 262, 471, 310)]   # button08, button09
 CLIMATE_TILE_PICS = {"light": (160, 161), "dark": (162, 163)}  # tiles, active tiles; see page_climate.h
 CLIMATE_SLIDERS = {  # slot -> (theme, part, top-left on the page, width)

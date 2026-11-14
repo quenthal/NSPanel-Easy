@@ -141,8 +141,6 @@ ClimateView climate_view(const SnapshotEntity &entity) {
 static const char *climate_tile_label(const char *name) {
   if (strcmp(name, "button03") == 0) {
     return "lbl_heat";
-  } else if (strcmp(name, "button07") == 0) {
-    return "lbl_off";
   } else if (strcmp(name, "button08") == 0) {
     return "button08_lbl";
   } else if (strcmp(name, "button09") == 0) {
@@ -151,41 +149,40 @@ static const char *climate_tile_label(const char *name) {
   return nullptr;
 }
 
-void climate_tile_draw(const char *name, bool shown, bool active, uint16_t color) {
+void climate_tile_draw(const char *name, bool shown, bool on, bool working, uint16_t color) {
   if (nextion_display == nullptr) {
     return;
   }  // if (no display)
-  const bool tile_button = strcmp(name, "button03") == 0 || strcmp(name, "button07") == 0 ||
-                           strcmp(name, "button08") == 0 || strcmp(name, "button09") == 0;
-  shown = shown && tile_button;  // the other HVAC modes are not shown on this page
+  const bool heating_tile = strcmp(name, "button03") == 0;
+  if (heating_tile) {
+    nextion_display->send_command_printf("climate.heat_on.val=%d", on ? 1 : 0);  // for its toggle
+  }  // if (heating_tile)
   const char *label = climate_tile_label(name);
-  if (!shown) {
+  if (!shown || label == nullptr) {  // only heating and the custom buttons are tiles
     nextion_display->hide_component(name);
     if (label != nullptr) {
       nextion_display->hide_component(label);
     }  // if (label)
     return;
-  }  // if (!shown)
+  }  // if (!shown || label == nullptr)
 #ifdef NSPANEL_EASY_HW_DISPLAY
   const bool light_theme = (current_theme == ThemeMode::LIGHT);
 #else   // NSPANEL_EASY_HW_DISPLAY
   const bool light_theme = false;
 #endif  // NSPANEL_EASY_HW_DISPLAY
-  // Amber means "on": an active off mode keeps the plain tile, only its text stands out
-  const bool amber = active && strcmp(name, "button07") != 0;
+  // Amber means "working": heating right now, or the device on
+  const bool amber = on && working;
   const uint8_t tiles = light_theme ? (amber ? CLIMATE_TILES_ON_PIC_LIGHT : CLIMATE_TILES_PIC_LIGHT)
                                     : (amber ? CLIMATE_TILES_ON_PIC_DARK : CLIMATE_TILES_PIC_DARK);
   if (light_theme) {
-    color = active ? Colors::RGB565_MIDNIGHT_TEXT : Colors::RGB565_MIDNIGHT_TEXT_SECONDARY;
+    color = on ? Colors::RGB565_MIDNIGHT_TEXT : Colors::RGB565_MIDNIGHT_TEXT_SECONDARY;
   }  // if (light_theme)
   nextion_display->send_command_printf("climate.%s.picc=%" PRIu8, name, tiles);
   nextion_display->send_command_printf("climate.%s.pco=%" PRIu16, name, color);
   nextion_display->show_component(name);
-  if (label != nullptr) {
-    nextion_display->send_command_printf("climate.%s.picc=%" PRIu8, label, tiles);
-    nextion_display->send_command_printf("climate.%s.pco=%s", label, active ? "color_pco_main" : "color_pco_secondary");
-    nextion_display->show_component(label);
-  }  // if (label)
+  nextion_display->send_command_printf("climate.%s.picc=%" PRIu8, label, tiles);
+  nextion_display->send_command_printf("climate.%s.pco=%s", label, on ? "color_pco_main" : "color_pco_secondary");
+  nextion_display->show_component(label);
 }
 
 void climate_mode_buttons_render(const SnapshotEntity &entity) {
@@ -193,69 +190,15 @@ void climate_mode_buttons_render(const SnapshotEntity &entity) {
     return;
   }  // if (no display)
   const std::vector<std::string> *modes = entity.list("hvac_modes");
+  // Heating right now: from hvac_action when the climate reports it, else whenever it is in heat mode
+  const std::string &hvac_action = entity.attribute("hvac_action");
+  const bool heating = climate_unusable(hvac_action) || hvac_action == "heating" || hvac_action == "preheating";
   for (const ClimateModeButton &button : CLIMATE_MODE_BUTTONS) {
     const bool supported =
         modes != nullptr && std::find(modes->begin(), modes->end(), button.hvac_mode) != modes->end();
     const bool active = entity.state == button.hvac_mode;
-    climate_tile_draw(button.name, supported, active, active ? button.color_active : button.color_inactive);
+    climate_tile_draw(button.name, supported, active, heating, active ? button.color_active : button.color_inactive);
   }  // for (button : CLIMATE_MODE_BUTTONS)
-}
-
-void climate_presets_render(const SnapshotEntity &entity) {
-  const optional<uint32_t> features = parse_number<uint32_t>(entity.attribute("supported_features"));
-  const std::vector<std::string> *modes = entity.list("preset_modes");
-  const bool supported = (features.value_or(0) & 16) != 0 && modes != nullptr && !modes->empty();  // PRESET_MODE
-  climate_preset_modes = supported ? *modes : std::vector<std::string>{};
-  climate_preset_mode = climate_unusable(entity.attribute("preset_mode")) ? "" : entity.attribute("preset_mode");
-  if (nextion_display == nullptr) {
-    return;
-  }  // if (no display)
-  if (!supported) {
-    nextion_display->hide_component(hmi::climate::PRESET_BUTTON.name);
-    return;
-  }  // if (no presets)
-
-  // Standard presets get the icon Home Assistant uses for them; none or a custom preset, the generic one
-  const char *icon = climate_preset_icons[0];
-  bool active = false;
-  if (!climate_preset_mode.empty()) {
-    active = !str_equals_case_insensitive(climate_preset_mode, "none");
-    for (uint8_t idx = 1; idx < CLIMATE_PRESET_NAMES_COUNT; ++idx) {
-      if (str_equals_case_insensitive(climate_preset_mode, climate_preset_names[idx])) {
-        icon = climate_preset_icons[idx];
-        break;
-      }  // if (standard preset)
-    }  // for each standard preset
-  }  // if (a preset is set)
-  nextion_display->set_component_text(hmi::climate::PRESET_BUTTON.name, icon);
-  // Theme colors from the display, so the button follows the light and dark themes
-  nextion_display->send_command_printf("climate.%s.pco=%s", hmi::climate::PRESET_BUTTON.name,
-                                       active ? "color_pco_main" : "color_pco_secondary");
-  nextion_display->show_component(hmi::climate::PRESET_BUTTON.name);
-}
-
-bool climate_presets_to_picker(const std::string &entity_id) {
-#ifdef NSPANEL_EASY_PAGE_POPUP_SELECT
-  if (climate_preset_modes.empty()) {
-    ESP_LOGW(TAG, "%s has no presets", entity_id.c_str());
-    return false;
-  }  // if (no presets)
-  popup_select_cache_entity = entity_id;
-  popup_select_cache_context = CLIMATE_PRESET_MODE_CONTEXT;
-  popup_select_cache_mode = POPUP_SELECT_MODE_SINGLE;
-  popup_select_cache_options = popup_select_visible_options(climate_preset_modes, climate_preset_mode);
-  popup_select_cache_mask = 0;
-  for (size_t idx = 0; idx < popup_select_cache_options.size(); ++idx) {
-    if (popup_select_cache_options[idx] == climate_preset_mode) {
-      popup_select_cache_mask = (1u << idx);
-      break;
-    }  // if (active preset)
-  }  // for each option
-  return true;
-#else   // NSPANEL_EASY_PAGE_POPUP_SELECT
-  (void) entity_id;
-  return false;
-#endif  // NSPANEL_EASY_PAGE_POPUP_SELECT
 }
 
 #ifdef NSPANEL_EASY_SUBSCRIBE
@@ -291,7 +234,7 @@ void climate_sub_render(const SubBinding &binding, const SubRuntime &rt, const c
 #endif  // NSPANEL_EASY_PAGE_BUTTONS
   // An "on" device is an active (amber) tile
   if (current_page_id == get_page_id("climate")) {
-    climate_tile_draw(binding.component, true, active && available, color);
+    climate_tile_draw(binding.component, true, active && available, true, color);
   }  // if (climate page shown)
 }
 #endif  // NSPANEL_EASY_SUBSCRIBE
